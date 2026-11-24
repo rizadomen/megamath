@@ -84,7 +84,11 @@
           <span id="lunas-info-bulan" class="font-extrabold text-slate-800">-</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-500">Total Tagihan</span>
+          <span class="text-slate-500">Sesi Dilunasi</span>
+          <span id="lunas-info-sesi" class="font-extrabold text-slate-800">0 pertemuan</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Nominal Tagihan</span>
           <span id="lunas-info-total" class="font-extrabold text-orange-600">Rp0</span>
         </div>
       </div>
@@ -121,7 +125,7 @@
     <form id="form-login-admin" class="space-y-4">
       <div>
         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">ID Admin</label>
-        <input type="text" id="admin-id-input" required placeholder="Contoh: ADMIN01 atau MEGA"
+        <input type="text" id="admin-id-input" required placeholder="Contoh: ADMIN01"
           class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
       </div>
       <div>
@@ -200,16 +204,22 @@
 
           <div class="flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden">
             <span class="px-3 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200">+62</span>
-            <input type="text" id="reg-wa-ortu" required placeholder="81234567890 (tanpa 0)"
+            <input type="text" id="reg-wa-ortu" inputmode="numeric" required placeholder="81234567890 (tanpa 0)"
               class="w-full px-3 py-3 font-bold text-slate-800 focus:outline-none">
           </div>
 
           <div class="flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden">
             <span class="px-3 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200">Rp</span>
-            <input type="number" id="reg-biaya" min="0" step="1000" required placeholder="Biaya / pertemuan"
+            <input type="number" id="reg-biaya" inputmode="numeric" min="1000" max="5000000" step="1000" required placeholder="100000"
               class="w-full px-3 py-3 font-bold text-slate-800 focus:outline-none">
           </div>
         </div>
+
+        <div class="flex items-center justify-between text-[11px] text-slate-500 font-semibold px-1">
+          <span>Nominal dibatasi kelipatan ribuan (Rp1.000 – Rp5.000.000)</span>
+          <span>Preview: <strong id="reg-biaya-preview" class="text-orange-600">Rp0</strong> / pertemuan</span>
+        </div>
+        <p id="reg-error" class="text-xs font-bold text-rose-500 hidden"></p>
 
         <button type="submit" class="w-full btn-orange text-white font-extrabold text-sm py-3.5 rounded-2xl mt-1">
           Buat No. Registrasi &amp; Aktifkan Siswa
@@ -303,7 +313,7 @@
         <div class="flex flex-col sm:flex-row gap-2.5">
           <div class="flex-1 flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden">
             <span class="px-3.5 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200">+62</span>
-            <input type="text" id="set-admin-wa-local" required placeholder="89611914296"
+            <input type="text" id="set-admin-wa-local" inputmode="numeric" required placeholder="89611914296"
               class="w-full px-3.5 py-3 font-extrabold text-slate-800 focus:outline-none">
           </div>
           <button type="submit" class="btn-orange text-white font-extrabold px-5 py-3 rounded-2xl shrink-0">
@@ -368,6 +378,10 @@
       firebase.initializeApp(firebaseConfig);
       var db = firebase.firestore();
 
+      var MIN_BIAYA = 1000;
+      var MAX_BIAYA = 5000000;
+      var STEP_BIAYA = 1000;
+
       var currentAdmin = null;
       var activeTab = "aktivasi";
       var pendingLunasTarget = null;
@@ -402,10 +416,11 @@
 
       function sanitizeWa62(raw) {
         var digits = String(raw || "").replace(/\D/g, "");
-        if (digits.indexOf("0") === 0) {
-          digits = "62" + digits.slice(1);
+        while (digits.indexOf("0") === 0) {
+          digits = digits.slice(1);
         }
-        if (digits && digits.indexOf("62") !== 0) {
+        if (!digits) return "";
+        if (digits.indexOf("62") !== 0) {
           digits = "62" + digits;
         }
         return digits;
@@ -413,11 +428,51 @@
 
       function strip62Prefix(wa62) {
         var d = sanitizeWa62(wa62);
-        return d.indexOf("62") === 0 ? d.slice(2) : d;
+        var local = d.indexOf("62") === 0 ? d.slice(2) : d;
+        while (local.indexOf("0") === 0) {
+          local = local.slice(1);
+        }
+        return local;
+      }
+
+      function attachNoZeroWaInput(inputEl) {
+        if (!inputEl) return;
+        inputEl.addEventListener("input", function() {
+          var digits = String(this.value || "").replace(/\D/g, "");
+          while (digits.indexOf("0") === 0) {
+            digits = digits.slice(1);
+          }
+          this.value = digits;
+        });
       }
 
       function formatRp(num) {
         return "Rp" + Number(num || 0).toLocaleString("id-ID");
+      }
+
+      function updateBiayaPreview() {
+        var input = document.getElementById("reg-biaya");
+        var preview = document.getElementById("reg-biaya-preview");
+        if (!input || !preview) return;
+        var val = Number(input.value || 0);
+        preview.textContent = formatRp(val > 0 ? val : 0);
+      }
+
+      function validateBiayaNominal(rawVal) {
+        var num = Number(rawVal);
+        if (!Number.isFinite(num) || num < MIN_BIAYA || num > MAX_BIAYA) {
+          return {
+            ok: false,
+            message: "Biaya per pertemuan harus di antara Rp1.000 sampai Rp5.000.000."
+          };
+        }
+        if (num % STEP_BIAYA !== 0) {
+          return {
+            ok: false,
+            message: "Biaya harus kelipatan ribuan (contoh: 50000, 100000, 150000)."
+          };
+        }
+        return { ok: true, value: num };
       }
 
       function setLoading(show) {
@@ -486,13 +541,15 @@
               globalPengaturan = {
                 namaBimbel: p.namaBimbel || "Mega Math - Bimbel Private",
                 adminWa: sanitizeWa62(p.adminWa || "6289611914296"),
-                biayaDefault: Number(p.biayaDefault) > 0 ? Number(p.biayaDefault) : 120000
+                biayaDefault: Number(p.biayaDefault) >= MIN_BIAYA ? Number(p.biayaDefault) : 120000
               };
             }
             document.getElementById("set-admin-wa-local").value = strip62Prefix(globalPengaturan.adminWa);
-            if (!document.getElementById("reg-biaya").value) {
-              document.getElementById("reg-biaya").value = globalPengaturan.biayaDefault;
+            var regBiaya = document.getElementById("reg-biaya");
+            if (regBiaya && !regBiaya.value) {
+              regBiaya.value = globalPengaturan.biayaDefault;
             }
+            updateBiayaPreview();
             return globalPengaturan;
           });
       }
@@ -501,7 +558,10 @@
         event.preventDefault();
         var localNum = String(document.getElementById("set-admin-wa-local").value || "").trim();
         var wa62 = sanitizeWa62(localNum);
-        if (!wa62) return;
+        if (!wa62 || wa62.length < 8) {
+          showNotif("⚠️", "Nomor Tidak Valid", "Masukkan nomor WA setelah +62 tanpa angka 0 di depan.");
+          return;
+        }
 
         setLoading(true);
         db.collection("pengaturan").doc("global").set({
@@ -534,7 +594,7 @@
             container.textContent = "";
 
             if (snap.empty) {
-              container.innerHTML = '<p class="text-slate-400 text-center py-2">Belum ada akun admin di koleksi Firestore. Gunakan form di atas untuk menambah.</p>';
+              container.innerHTML = '<p class="text-slate-400 text-center py-2">Belum ada akun admin di koleksi Firestore.</p>';
               return;
             }
 
@@ -605,7 +665,7 @@
           } else if (existing.exists && existing.data().password) {
             payload.password = existing.data().password;
           } else {
-            payload.password = "admin123";
+            payload.password = "1234";
           }
 
           return adminRef.set(payload, { merge: true });
@@ -654,9 +714,23 @@
         var kelas = String(document.getElementById("reg-kelas").value || "").trim();
         var namaOrtu = String(document.getElementById("reg-nama-ortu").value || "").trim();
         var waOrtu = sanitizeWa62(document.getElementById("reg-wa-ortu").value);
-        var biayaPerSesi = Number(document.getElementById("reg-biaya").value || 0);
+        var biayaCheck = validateBiayaNominal(document.getElementById("reg-biaya").value);
+        var errEl = document.getElementById("reg-error");
+        errEl.classList.add("hidden");
 
         if (!nama || !kelas) return;
+        if (!waOrtu || waOrtu.length < 8) {
+          errEl.textContent = "Nomor WA orang tua wajib diisi setelah +62 tanpa angka 0 di depan.";
+          errEl.classList.remove("hidden");
+          return;
+        }
+        if (!biayaCheck.ok) {
+          errEl.textContent = biayaCheck.message;
+          errEl.classList.remove("hidden");
+          return;
+        }
+
+        var biayaPerSesi = biayaCheck.value;
         setLoading(true);
 
         generateUniqueNoReg()
@@ -697,7 +771,7 @@
               "• Link Portal Siswa: https://rizadomen.github.io/megamath/\n" +
               "Silakan login lalu ganti password bawaan ya."
             );
-            document.getElementById("btn-kirim-wa-ortu").href = created.waOrtu ? ("https://wa.me/" + created.waOrtu + "?text=" + pesanWa) : "#";
+            document.getElementById("btn-kirim-wa-ortu").href = "https://wa.me/" + created.waOrtu + "?text=" + pesanWa;
             document.getElementById("aktivasi-result-box").classList.remove("hidden");
 
             document.getElementById("reg-nama").value = "";
@@ -715,7 +789,8 @@
         pendingLunasTarget = item;
         document.getElementById("lunas-info-siswa").textContent = item.nama + " (" + item.noReg + ")";
         document.getElementById("lunas-info-bulan").textContent = item.bulan;
-        document.getElementById("lunas-info-total").textContent = formatRp(item.totalTagihan);
+        document.getElementById("lunas-info-sesi").textContent = item.sesiBelumBayar + " pertemuan baru (total hadir: " + item.sesiTotal + "x)";
+        document.getElementById("lunas-info-total").textContent = formatRp(item.tagihanBelumBayar);
         document.getElementById("lunas-tgl-bayar").value = (item.tglBayar && item.tglBayar !== "-") ? item.tglBayar : getTodayStr();
         document.getElementById("lunas-link-bukti").value = item.linkBukti || "";
         document.getElementById("lunas-error").classList.add("hidden");
@@ -739,12 +814,14 @@
         var tglBayar = String(document.getElementById("lunas-tgl-bayar").value || "").trim();
         var linkBukti = String(document.getElementById("lunas-link-bukti").value || "").trim();
         var docId = pendingLunasTarget.noReg + "_" + pendingLunasTarget.bulan;
+        var sesiLunasBaru = pendingLunasTarget.sesiTotal;
 
         setLoading(true);
         db.collection("pembayaran").doc(docId).set({
           noReg: pendingLunasTarget.noReg,
           bulan: pendingLunasTarget.bulan,
           statusBayar: "LUNAS",
+          sesiTerbayar: sesiLunasBaru,
           tglBayar: tglBayar,
           linkBukti: linkBukti,
           verifiedBy: currentAdmin.nama,
@@ -753,7 +830,7 @@
           .then(function() {
             setLoading(false);
             closeLunasModal();
-            showNotif("✅", "Berhasil LUNAS", "Pembayaran " + pendingLunasTarget.nama + " sudah dicatat LUNAS.");
+            showNotif("✅", "Tagihan LUNAS", sesiLunasBaru + " pertemuan tercatat LUNAS. Sisa tagihan berjalan kini Rp0.");
             loadSiswaDanTagihan();
           })
           .catch(function() {
@@ -768,6 +845,7 @@
           noReg: item.noReg,
           bulan: item.bulan,
           statusBayar: "BELUM LUNAS",
+          sesiTerbayar: 0,
           tglBayar: "",
           linkBukti: "",
           verifiedBy: "",
@@ -834,20 +912,34 @@
               var s = doc.data();
               var noReg = String(s.noReg || doc.id);
               var tarif = Number(s.biayaPerSesi) > 0 ? Number(s.biayaPerSesi) : pengaturan.biayaDefault;
-              var sesi = sesiMap[noReg] || 0;
-              var total = sesi * tarif;
+              var sesiTotal = sesiMap[noReg] || 0;
+
               var pay = bayarMap[noReg] || {};
-              var isLunas = String(pay.statusBayar || "").toUpperCase() === "LUNAS";
+              var rawStatus = String(pay.statusBayar || "").toUpperCase();
+              var sesiTerbayar = (typeof pay.sesiTerbayar === "number")
+                ? Math.max(0, pay.sesiTerbayar)
+                : (rawStatus === "LUNAS" ? sesiTotal : 0);
+
+              if (sesiTerbayar > sesiTotal) {
+                sesiTerbayar = sesiTotal;
+              }
+
+              var sesiBelumBayar = Math.max(0, sesiTotal - sesiTerbayar);
+              var tagihanBelumBayar = sesiBelumBayar * tarif;
+              var isLunas = (rawStatus === "LUNAS" && sesiBelumBayar === 0);
 
               list.push({
                 noReg: noReg,
                 nama: String(s.nama || "-"),
                 kelas: String(s.kelas || "-"),
                 bulan: bulan,
-                sesi: sesi,
+                sesiTotal: sesiTotal,
+                sesiTerbayar: sesiTerbayar,
+                sesiBelumBayar: sesiBelumBayar,
                 tarif: tarif,
-                totalTagihan: total,
+                tagihanBelumBayar: tagihanBelumBayar,
                 isLunas: isLunas,
+                hasPaidSessions: sesiTerbayar > 0 || rawStatus === "LUNAS",
                 tglBayar: pay.tglBayar ? String(pay.tglBayar) : "-",
                 verifiedBy: pay.verifiedBy ? String(pay.verifiedBy) : "",
                 verifiedAdminId: pay.verifiedAdminId ? String(pay.verifiedAdminId) : "",
@@ -901,12 +993,15 @@
 
                 var calcLine = document.createElement("div");
                 calcLine.className = "text-slate-600 font-semibold";
-                calcLine.textContent = item.sesi + " pertemuan x " + formatRp(item.tarif) + " = " + formatRp(item.totalTagihan);
+                calcLine.textContent =
+                  item.sesiBelumBayar + " pertemuan belum bayar x " + formatRp(item.tarif) +
+                  " = " + formatRp(item.tagihanBelumBayar) +
+                  " (Total hadir: " + item.sesiTotal + "x • Terbayar: " + item.sesiTerbayar + "x)";
 
                 left.appendChild(head);
                 left.appendChild(calcLine);
 
-                if (item.isLunas) {
+                if (item.hasPaidSessions) {
                   var metaLunas = document.createElement("div");
                   metaLunas.className = "text-[11px] font-extrabold text-emerald-700";
                   var byText = item.verifiedBy ? (" • Oleh: " + item.verifiedBy + (item.verifiedAdminId ? " (" + item.verifiedAdminId + ")" : "")) : "";
@@ -934,10 +1029,9 @@
                 btnReset.addEventListener("click", function() {
                   resetPasswordSiswa(item);
                 });
-
                 actions.appendChild(btnReset);
 
-                if (item.isLunas) {
+                if (item.hasPaidSessions) {
                   var btnBatal = document.createElement("button");
                   btnBatal.type = "button";
                   btnBatal.className = "text-xs font-extrabold px-3 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200";
@@ -946,7 +1040,9 @@
                     batalkanLunas(item);
                   });
                   actions.appendChild(btnBatal);
-                } else {
+                }
+
+                if (!item.isLunas) {
                   var btnTandai = document.createElement("button");
                   btnTandai.type = "button";
                   btnTandai.className = "text-xs font-extrabold px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white";
@@ -1022,9 +1118,7 @@
             });
 
             rows.sort(function(a, b) {
-              var keyA = a.tanggal + " " + a.jam;
-              var keyB = b.tanggal + " " + b.jam;
-              return keyB.localeCompare(keyA);
+              return (b.tanggal + " " + b.jam).localeCompare(a.tanggal + " " + a.jam);
             });
 
             var container = document.getElementById("admin-riwayat-hadir");
@@ -1098,7 +1192,7 @@
 
       function handleLoginAdmin(event) {
         event.preventDefault();
-        var adminId = String(document.getElementById("admin-id-input").value || "").trim();
+        var adminId = String(document.getElementById("admin-id-input").value || "").trim().toUpperCase();
         var pass = String(document.getElementById("admin-pass-input").value || "");
         var errEl = document.getElementById("admin-login-error");
         errEl.classList.add("hidden");
@@ -1146,6 +1240,20 @@
       }
 
       document.addEventListener("DOMContentLoaded", function() {
+        attachNoZeroWaInput(document.getElementById("reg-wa-ortu"));
+        attachNoZeroWaInput(document.getElementById("set-admin-wa-local"));
+
+        var regBiayaInput = document.getElementById("reg-biaya");
+        if (regBiayaInput) {
+          regBiayaInput.addEventListener("input", updateBiayaPreview);
+          regBiayaInput.addEventListener("change", function() {
+            var v = Number(this.value || 0);
+            if (v > 0 && v < MIN_BIAYA) this.value = MIN_BIAYA;
+            if (v > MAX_BIAYA) this.value = MAX_BIAYA;
+            updateBiayaPreview();
+          });
+        }
+
         document.getElementById("btn-tutup-notif").addEventListener("click", closeNotif);
         document.getElementById("form-login-admin").addEventListener("submit", handleLoginAdmin);
         document.getElementById("btn-logout-admin").addEventListener("click", handleLogoutAdmin);
