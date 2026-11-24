@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#FB923C">
-  <link rel="icon" type="image/png" href="favicon-megamath.png">
-  <link rel="apple-touch-icon" href="favicon-megamath.png">
+  <link rel="icon" type="image/png" href="logo-megamath.png">
+  <link rel="apple-touch-icon" href="logo-megamath.png">
   <title>Panel Admin Bimbel - Mega Math</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -78,7 +78,13 @@
             class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Link Bukti Pembayaran (Google Drive / URL)</label>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Upload Gambar Bukti (Otomatis ke Google Drive)</label>
+          <input type="file" id="lunas-file-bukti" accept="image/*"
+            class="w-full px-3 py-2 rounded-2xl bg-orange-50/50 border border-orange-200 text-xs font-bold text-slate-700 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200">
+          <p id="lunas-upload-status" class="text-[11px] font-bold text-slate-500 mt-1 hidden"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Link Bukti Pembayaran (Otomatis Terisi / Manual URL)</label>
           <input type="url" id="lunas-link-bukti" placeholder="https://drive.google.com/..."
             class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
         </div>
@@ -127,7 +133,7 @@
     <div class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-5 space-y-4">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-          <img src="favicon-megamath.png" alt="Mega Math" class="w-12 sm:w-14 h-9 sm:h-10 object-contain mix-blend-multiply shrink-0">
+          <img src="logo-megamath.png" alt="Mega Math" class="w-12 sm:w-14 h-9 sm:h-10 object-contain mix-blend-multiply shrink-0">
           <div class="min-w-0">
             <h2 class="text-base sm:text-xl font-extrabold text-slate-800 truncate">Panel Admin Bimbel</h2>
             <p class="text-[11px] sm:text-xs font-bold text-slate-500 mt-0.5 truncate">
@@ -361,6 +367,8 @@
         appId: "1:1018677380626:web:0f37cc89072d1816b57acb",
         measurementId: "G-X3JBT00B7L"
       };
+
+      var DRIVE_UPLOAD_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwG5S2T5xWtmzIClhSrpWvky6W8o7CCxQZqdglXNH5KDUr_oDfvqKW-FcHiMeWBmSGHGA/exec";
 
       firebase.initializeApp(firebaseConfig);
       var db = firebase.firestore();
@@ -774,6 +782,53 @@
           });
       }
 
+      function fileToBase64(file) {
+        return new Promise(function(resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function() {
+            resolve(String(reader.result || ""));
+          };
+          reader.onerror = function() {
+            reject(new Error("Gagal membaca file gambar."));
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function uploadBuktiKeDrive(file, noReg, bulan) {
+        if (!file) return Promise.resolve("");
+
+        if (!DRIVE_UPLOAD_WEBAPP_URL) {
+          return Promise.reject(new Error("URL Web App Google Drive belum diatur."));
+        }
+
+        var ext = (file.name && file.name.lastIndexOf(".") !== -1)
+          ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase()
+          : ".jpg";
+        var safeName = "bukti_" + noReg + "_" + bulan + "_" + Date.now() + ext;
+
+        return fileToBase64(file).then(function(dataUrl) {
+          return fetch(DRIVE_UPLOAD_WEBAPP_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              base64: dataUrl,
+              mimeType: file.type || "image/jpeg",
+              fileName: safeName
+            })
+          });
+        })
+          .then(function(res) {
+            return res.json();
+          })
+          .then(function(data) {
+            if (!data || !data.ok || !data.linkBukti) {
+              throw new Error((data && data.error) || "Upload ke Google Drive gagal.");
+            }
+            return String(data.linkBukti);
+          });
+      }
+
       function openLunasModal(item) {
         pendingLunasTarget = item;
         document.getElementById("lunas-info-siswa").textContent = item.nama + " (" + item.noReg + ")";
@@ -782,6 +837,11 @@
         document.getElementById("lunas-info-total").textContent = formatRp(item.tagihanBelumBayar);
         document.getElementById("lunas-tgl-bayar").value = (item.tglBayar && item.tglBayar !== "-") ? item.tglBayar : getTodayStr();
         document.getElementById("lunas-link-bukti").value = item.linkBukti || "";
+
+        var fileInput = document.getElementById("lunas-file-bukti");
+        if (fileInput) fileInput.value = "";
+        var statusEl = document.getElementById("lunas-upload-status");
+        if (statusEl) statusEl.classList.add("hidden");
         document.getElementById("lunas-error").classList.add("hidden");
 
         var modal = document.getElementById("modal-lunas");
@@ -801,29 +861,62 @@
         if (!pendingLunasTarget || !currentAdmin) return;
 
         var tglBayar = String(document.getElementById("lunas-tgl-bayar").value || "").trim();
-        var linkBukti = String(document.getElementById("lunas-link-bukti").value || "").trim();
+        var manualLink = String(document.getElementById("lunas-link-bukti").value || "").trim();
+        var fileInput = document.getElementById("lunas-file-bukti");
+        var fileObj = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0] : null;
+        var errEl = document.getElementById("lunas-error");
+        var statusEl = document.getElementById("lunas-upload-status");
+
+        errEl.classList.add("hidden");
+
+        if (fileObj && fileObj.size > 5 * 1024 * 1024) {
+          errEl.textContent = "Ukuran gambar maksimal 5 MB ya.";
+          errEl.classList.remove("hidden");
+          return;
+        }
+
         var docId = pendingLunasTarget.noReg + "_" + pendingLunasTarget.bulan;
         var sesiLunasBaru = pendingLunasTarget.sesiTotal;
 
         setLoading(true);
-        db.collection("pembayaran").doc(docId).set({
-          noReg: pendingLunasTarget.noReg,
-          bulan: pendingLunasTarget.bulan,
-          statusBayar: "LUNAS",
-          sesiTerbayar: sesiLunasBaru,
-          tglBayar: tglBayar,
-          linkBukti: linkBukti,
-          verifiedBy: currentAdmin.nama,
-          verifiedAdminId: currentAdmin.id
-        }, { merge: true })
+        if (fileObj && statusEl) {
+          statusEl.textContent = "Mengupload bukti pembayaran ke Google Drive...";
+          statusEl.classList.remove("hidden");
+        }
+
+        uploadBuktiKeDrive(fileObj, pendingLunasTarget.noReg, pendingLunasTarget.bulan)
+          .then(function(uploadedUrl) {
+            var finalLinkBukti = uploadedUrl || manualLink;
+            if (uploadedUrl) {
+              document.getElementById("lunas-link-bukti").value = uploadedUrl;
+            }
+            if (statusEl) {
+              statusEl.classList.add("hidden");
+            }
+
+            return db.collection("pembayaran").doc(docId).set({
+              noReg: pendingLunasTarget.noReg,
+              bulan: pendingLunasTarget.bulan,
+              statusBayar: "LUNAS",
+              sesiTerbayar: sesiLunasBaru,
+              tglBayar: tglBayar,
+              linkBukti: finalLinkBukti,
+              verifiedBy: currentAdmin.nama,
+              verifiedAdminId: currentAdmin.id
+            }, { merge: true });
+          })
           .then(function() {
             setLoading(false);
+            if (fileInput) fileInput.value = "";
             closeLunasModal();
             showNotif("✅", "Tagihan LUNAS", sesiLunasBaru + " pertemuan tercatat LUNAS. Sisa tagihan berjalan kini Rp0.");
             loadSiswaDanTagihan();
           })
-          .catch(function() {
+          .catch(function(err) {
             setLoading(false);
+            if (statusEl) statusEl.classList.add("hidden");
+            errEl.textContent = (err && err.message) ? err.message : "Gagal mengupload bukti atau menyimpan status LUNAS.";
+            errEl.classList.remove("hidden");
           });
       }
 
