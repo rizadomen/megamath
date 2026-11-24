@@ -107,8 +107,8 @@
           <span id="inv-bulan" class="font-extrabold text-slate-800">-</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-500">Jumlah Pertemuan</span>
-          <span id="inv-sesi" class="font-extrabold text-orange-600">0x</span>
+          <span class="text-slate-500">Rincian Sesi</span>
+          <span id="inv-sesi" class="font-extrabold text-orange-600">0 pertemuan belum bayar</span>
         </div>
         <div class="flex justify-between">
           <span class="text-slate-500">Biaya per Pertemuan</span>
@@ -123,7 +123,7 @@
           <span id="inv-status" class="text-xs font-extrabold px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700">BELUM LUNAS</span>
         </div>
 
-        <!-- INFO PELUNASAN & BUKTI BAYAR (MUNCUL SAAT LUNAS) -->
+        <!-- INFO PELUNASAN & BUKTI BAYAR -->
         <div id="inv-lunas-box" class="hidden mt-2.5 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1.5">
           <div class="flex justify-between items-center">
             <span class="font-bold text-emerald-800">Tanggal Pelunasan</span>
@@ -245,7 +245,7 @@
     </div>
   </div>
 
-  <!-- FIREBASE COMPAT SDK (MUDAH DIPAKAI BERSAMA <script> BIASA) -->
+  <!-- FIREBASE COMPAT SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
@@ -411,10 +411,11 @@
         if (!currentUser || !currentUser.data || !latestDashboard) return;
         var d = currentUser.data;
         var dash = latestDashboard;
+        var sesiTampil = (typeof dash.sesiBelumBayar === "number") ? dash.sesiBelumBayar : dash.jumlahPertemuan;
 
         document.getElementById("inv-nama").textContent = d.nama + " (" + d.noReg + ")";
         document.getElementById("inv-bulan").textContent = dash.selectedMonth;
-        document.getElementById("inv-sesi").textContent = dash.jumlahPertemuan + " pertemuan";
+        document.getElementById("inv-sesi").textContent = sesiTampil + " pertemuan belum bayar";
         document.getElementById("inv-tarif").textContent = formatRp(dash.biayaPerSesi) + " / pertemuan";
         document.getElementById("inv-total").textContent = formatRp(dash.totalTagihan);
 
@@ -433,7 +434,7 @@
         var teksWa = encodeURIComponent(
           "Halo Admin " + (globalPengaturan.namaBimbel || "Mega Math") +
           ", saya ingin konfirmasi tagihan les " + d.nama + " (No. Reg: " + d.noReg + ") " +
-          "periode " + dash.selectedMonth + ": " + dash.jumlahPertemuan + " pertemuan x " +
+          "periode " + dash.selectedMonth + ": " + sesiTampil + " pertemuan belum bayar x " +
           formatRp(dash.biayaPerSesi) + " = " + formatRp(dash.totalTagihan) + "."
         );
         document.getElementById("btn-konfirmasi-wa").href = "https://wa.me/" + waTarget + "?text=" + teksWa;
@@ -633,10 +634,19 @@
             });
 
             var jumlahPertemuan = riwayat.length;
-            var totalTagihan = jumlahPertemuan * biayaPerSesi;
-
             var payData = bayarDoc.exists ? bayarDoc.data() : {};
-            var statusBayar = String(payData.statusBayar || "BELUM LUNAS").trim().toUpperCase();
+
+            var rawStatusBayar = String(payData.statusBayar || "BELUM LUNAS").trim().toUpperCase();
+            var sesiTerbayar = (typeof payData.sesiTerbayar === "number")
+              ? Math.max(0, payData.sesiTerbayar)
+              : (rawStatusBayar === "LUNAS" ? jumlahPertemuan : 0);
+            if (sesiTerbayar > jumlahPertemuan) {
+              sesiTerbayar = jumlahPertemuan;
+            }
+            var sesiBelumBayar = Math.max(0, jumlahPertemuan - sesiTerbayar);
+            var totalTagihan = sesiBelumBayar * biayaPerSesi;
+            var statusBayar = (rawStatusBayar === "LUNAS" && sesiBelumBayar === 0) ? "LUNAS" : "BELUM LUNAS";
+
             var tglBayar = payData.tglBayar ? String(payData.tglBayar).trim() : "-";
             var linkBukti = payData.linkBukti ? String(payData.linkBukti).trim() : "";
 
@@ -647,6 +657,7 @@
               sudahHadirHariIni: sudahHadirHariIni,
               jamHadirHariIni: jamHadirHariIni,
               jumlahPertemuan: jumlahPertemuan,
+              sesiBelumBayar: sesiBelumBayar,
               biayaPerSesi: biayaPerSesi,
               totalTagihan: totalTagihan,
               statusBayar: statusBayar,
