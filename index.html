@@ -151,14 +151,14 @@
       <div class="w-16 h-16 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl">
         🎒
       </div>
-      <h1 class="text-2xl font-extrabold text-slate-800">Portal Siswa</h1>
+      <h1 class="text-2xl font-extrabold text-slate-800">Mega Math</h1>
       <p class="text-sm text-slate-500 mt-1">Masuk pakai Nomor Registrasi kamu ya!</p>
     </div>
 
     <form id="form-login-siswa" class="space-y-4">
       <div>
         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Nomor Registrasi</label>
-        <input type="text" id="login-noreg" inputmode="numeric" required placeholder="Contoh: 20261123001"
+        <input type="text" id="login-noreg" inputmode="numeric" required placeholder="Contoh: 20261124001"
           class="w-full px-4 py-3.5 rounded-2xl bg-orange-50/50 border border-orange-200 focus:outline-none focus:border-orange-400 focus:bg-white text-lg font-bold text-slate-800">
       </div>
       <div>
@@ -231,7 +231,7 @@
       </button>
     </div>
 
-    <!-- RIWAYAT PRESENSI (MAKS 3 BULAN) -->
+    <!-- RIWAYAT PRESENSI -->
     <div class="soft-card p-5">
       <div class="flex items-center justify-between gap-2 mb-3">
         <h4 class="text-sm font-extrabold text-slate-700">🕒 Riwayat Presensi</h4>
@@ -244,22 +244,57 @@
       </div>
     </div>
   </div>
-const API_URL = "https://script.google.com/macros/s/AKfycbxBhixxhH5obaR6jGCSbAnag44wZMp7mcjKzSNvAPJD61D4LnP7WYkJtdwQ-PdTO1xCeQ/exec";
 
-function callBackend(action, args) {
-  return fetch(API_URL, {
-    method: "POST",
-    // Wajib text/plain agar browser tidak mengirim preflight OPTIONS yang ditolak Apps Script
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action: action, args: args })
-  }).then(function(res) {
-    return res.json();
-  });
-}
+  <!-- FIREBASE COMPAT SDK (MUDAH DIPAKAI BERSAMA <script> BIASA) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
   <script>
     (function() {
+      var firebaseConfig = {
+        apiKey: "AIzaSyDmBlSBdeVPRO-AeUPQPEpDJzOLVE6fLUE",
+        authDomain: "mega-math-bimbel.firebaseapp.com",
+        projectId: "mega-math-bimbel",
+        storageBucket: "mega-math-bimbel.firebasestorage.app",
+        messagingSenderId: "1018677380626",
+        appId: "1:1018677380626:web:0f37cc89072d1816b57acb",
+        measurementId: "G-X3JBT00B7L"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.firestore();
+
       var currentUser = null;
       var latestDashboard = null;
+      var globalPengaturan = { namaBimbel: "Mega Math - Bimbel Private", adminWa: "6289611914296", biayaDefault: 120000 };
+
+      function pad2(n) {
+        return n < 10 ? "0" + n : String(n);
+      }
+
+      function getTodayStr() {
+        var now = new Date();
+        return now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-" + pad2(now.getDate());
+      }
+
+      function getCurrentMonthStr() {
+        return getTodayStr().slice(0, 7);
+      }
+
+      function getNowJamStr() {
+        var now = new Date();
+        return pad2(now.getHours()) + ":" + pad2(now.getMinutes());
+      }
+
+      function getRecentMonths(count) {
+        var list = [];
+        var now = new Date();
+        for (var i = 0; i < count; i++) {
+          var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          list.push(d.getFullYear() + "-" + pad2(d.getMonth() + 1));
+        }
+        return list;
+      }
 
       function formatRp(num) {
         return "Rp" + Number(num || 0).toLocaleString("id-ID");
@@ -333,6 +368,45 @@ function callBackend(action, args) {
         modal.classList.remove("flex");
       }
 
+      function applyInvoiceLunasSection(dashData) {
+        var lunasBox = document.getElementById("inv-lunas-box");
+        var tglEl = document.getElementById("inv-tgl-bayar");
+        var buktiWrap = document.getElementById("inv-bukti-wrap");
+        var buktiLink = document.getElementById("inv-link-bukti");
+        var statusEl = document.getElementById("inv-status");
+
+        if (!lunasBox || !tglEl || !buktiWrap || !buktiLink) return;
+
+        var statusText = statusEl ? String(statusEl.textContent || "").toUpperCase() : "";
+        var dataStatus = (dashData && dashData.statusBayar) ? String(dashData.statusBayar).toUpperCase() : "";
+        var isLunas = (dataStatus === "LUNAS" || (statusText.indexOf("LUNAS") !== -1 && statusText.indexOf("BELUM") === -1));
+
+        if (!isLunas) {
+          lunasBox.classList.add("hidden");
+          buktiWrap.classList.add("hidden");
+          buktiLink.href = "#";
+          tglEl.textContent = "-";
+          return;
+        }
+
+        var tglBayar = (dashData && dashData.tglBayar) ? String(dashData.tglBayar).trim() : "";
+        if (/^\d{4}-\d{2}-\d{2}/.test(tglBayar)) {
+          tglBayar = tglBayar.substring(0, 10);
+        }
+        tglEl.textContent = (tglBayar && tglBayar !== "-") ? tglBayar : "Tercatat LUNAS";
+
+        var rawBukti = (dashData && dashData.linkBukti) ? String(dashData.linkBukti).trim() : "";
+        if (/^https?:\/\//i.test(rawBukti)) {
+          buktiLink.href = rawBukti;
+          buktiWrap.classList.remove("hidden");
+        } else {
+          buktiLink.href = "#";
+          buktiWrap.classList.add("hidden");
+        }
+
+        lunasBox.classList.remove("hidden");
+      }
+
       function openInvoiceModal() {
         if (!currentUser || !currentUser.data || !latestDashboard) return;
         var d = currentUser.data;
@@ -355,12 +429,14 @@ function callBackend(action, args) {
 
         applyInvoiceLunasSection(dash);
 
+        var waTarget = (dash.adminWa || globalPengaturan.adminWa || "").replace(/\D/g, "");
         var teksWa = encodeURIComponent(
-          "Halo Admin, saya ingin konfirmasi tagihan les " + d.nama + " (No. Reg: " + d.noReg + ") " +
+          "Halo Admin " + (globalPengaturan.namaBimbel || "Mega Math") +
+          ", saya ingin konfirmasi tagihan les " + d.nama + " (No. Reg: " + d.noReg + ") " +
           "periode " + dash.selectedMonth + ": " + dash.jumlahPertemuan + " pertemuan x " +
           formatRp(dash.biayaPerSesi) + " = " + formatRp(dash.totalTagihan) + "."
         );
-        document.getElementById("btn-konfirmasi-wa").href = "https://wa.me/" + d.adminWa + "?text=" + teksWa;
+        document.getElementById("btn-konfirmasi-wa").href = "https://wa.me/" + waTarget + "?text=" + teksWa;
 
         var modal = document.getElementById("modal-invoice");
         modal.classList.remove("hidden");
@@ -373,42 +449,93 @@ function callBackend(action, args) {
         modal.classList.remove("flex");
       }
 
+      function loadGlobalPengaturan() {
+        return db.collection("pengaturan").doc("global").get()
+          .then(function(doc) {
+            if (doc.exists) {
+              var p = doc.data();
+              globalPengaturan = {
+                namaBimbel: p.namaBimbel || "Mega Math - Bimbel Private",
+                adminWa: String(p.adminWa || "6289611914296"),
+                biayaDefault: Number(p.biayaDefault) > 0 ? Number(p.biayaDefault) : 120000
+              };
+            }
+            return globalPengaturan;
+          })
+          .catch(function() {
+            return globalPengaturan;
+          });
+      }
+
       function handleLoginSiswa(event) {
         event.preventDefault();
-        var noReg = document.getElementById("login-noreg").value;
-        var pass = document.getElementById("login-pass").value;
+        var noReg = String(document.getElementById("login-noreg").value || "").trim();
+        var pass = String(document.getElementById("login-pass").value || "");
         var errEl = document.getElementById("login-error");
         errEl.classList.add("hidden");
         setLoading(true);
 
-        callBackend("loginSiswa", [noReg, pass])
-          .then(function(res) {
+        loadGlobalPengaturan()
+          .then(function() {
+            return db.collection("siswa").doc(noReg).get();
+          })
+          .then(function(doc) {
             setLoading(false);
-            if (res && res.status === "success") {
-              currentUser = res;
-              try {
-                localStorage.setItem("bimbel_siswa_session", JSON.stringify(res));
-              } catch (e) {}
-              showDashboard(res.data);
-              if (res.mustChangePassword) {
-                openPasswordModal(true);
-              }
-            } else {
-              errEl.textContent = (res && res.message) ? res.message : "Login gagal.";
+            if (!doc.exists) {
+              errEl.textContent = "Nomor Registrasi tidak ditemukan.";
               errEl.classList.remove("hidden");
+              return;
+            }
+
+            var s = doc.data();
+            if (s.statusAktif === false) {
+              errEl.textContent = "Akun siswa belum aktif. Hubungi Admin ya!";
+              errEl.classList.remove("hidden");
+              return;
+            }
+
+            if (String(s.password || "") !== pass) {
+              errEl.textContent = "Password salah, silakan coba lagi.";
+              errEl.classList.remove("hidden");
+              return;
+            }
+
+            var tarifPerSesi = Number(s.biayaPerSesi) > 0
+              ? Number(s.biayaPerSesi)
+              : globalPengaturan.biayaDefault;
+
+            var userData = {
+              noReg: String(s.noReg || noReg),
+              nama: String(s.nama || "Siswa"),
+              kelas: String(s.kelas || "-"),
+              biayaPerSesi: tarifPerSesi,
+              adminWa: globalPengaturan.adminWa
+            };
+
+            var mustChange = (s.mustChangePassword === true) || (String(s.password || "") === String(s.noReg || noReg));
+            var sessionObj = { status: "success", data: userData, mustChangePassword: mustChange };
+
+            currentUser = sessionObj;
+            try {
+              localStorage.setItem("bimbel_siswa_session", JSON.stringify(sessionObj));
+            } catch (e) {}
+
+            showDashboard(userData);
+            if (mustChange) {
+              openPasswordModal(true);
             }
           })
           .catch(function() {
             setLoading(false);
-            errEl.textContent = "Terjadi gangguan koneksi.";
+            errEl.textContent = "Terjadi gangguan koneksi ke database.";
             errEl.classList.remove("hidden");
           });
       }
 
       function handleGantiPassword(event) {
         event.preventDefault();
-        var p1 = document.getElementById("new-password").value;
-        var p2 = document.getElementById("confirm-password").value;
+        var p1 = String(document.getElementById("new-password").value || "");
+        var p2 = String(document.getElementById("confirm-password").value || "");
         var errEl = document.getElementById("pass-error");
         errEl.classList.add("hidden");
 
@@ -418,24 +545,23 @@ function callBackend(action, args) {
           return;
         }
 
+        if (!currentUser || !currentUser.data) return;
         setLoading(true);
-        google.script.run
-          .withSuccessHandler(function(res) {
+
+        db.collection("siswa").doc(String(currentUser.data.noReg)).update({
+          password: p1,
+          mustChangePassword: false
+        })
+          .then(function() {
             setLoading(false);
-            if (res && res.status === "success") {
-              closePasswordModal();
-              showNotif("🔐", "Password Berhasil Diganti", "Password baru kamu sudah tersimpan. Pakai password ini untuk login berikutnya ya!");
-            } else {
-              errEl.textContent = (res && res.message) ? res.message : "Gagal mengganti password.";
-              errEl.classList.remove("hidden");
-            }
+            closePasswordModal();
+            showNotif("🔐", "Password Berhasil Diganti", "Password baru kamu sudah tersimpan. Pakai password ini untuk login berikutnya ya!");
           })
-          .withFailureHandler(function() {
+          .catch(function() {
             setLoading(false);
-            errEl.textContent = "Gagal menghubungi server.";
+            errEl.textContent = "Gagal menyimpan password baru.";
             errEl.classList.remove("hidden");
-          })
-          .gantiPasswordSiswa(currentUser.data.noReg, p1);
+          });
       }
 
       function showDashboard(data) {
@@ -453,25 +579,95 @@ function callBackend(action, args) {
       }
 
       function loadDashboard(noReg, selectedMonth) {
+        var currentMonth = getCurrentMonthStr();
+        var targetMonth = selectedMonth || currentMonth;
+        var todayStr = getTodayStr();
+        var monthsList = getRecentMonths(3);
+
         setLoading(true);
-        google.script.run
-          .withSuccessHandler(function(res) {
+
+        Promise.all([
+          loadGlobalPengaturan(),
+          db.collection("siswa").doc(String(noReg)).get(),
+          db.collection("presensi")
+            .where("noReg", "==", String(noReg))
+            .where("bulan", "==", targetMonth)
+            .get(),
+          db.collection("pembayaran").doc(String(noReg) + "_" + targetMonth).get()
+        ])
+          .then(function(results) {
             setLoading(false);
-            if (!res) return;
+            var pengaturan = results[0];
+            var siswaDoc = results[1];
+            var presensiSnap = results[2];
+            var bayarDoc = results[3];
+
+            var siswaField = siswaDoc.exists ? siswaDoc.data() : {};
+            var biayaPerSesi = Number(siswaField.biayaPerSesi) > 0
+              ? Number(siswaField.biayaPerSesi)
+              : pengaturan.biayaDefault;
+
+            if (currentUser && currentUser.data) {
+              currentUser.data.biayaPerSesi = biayaPerSesi;
+              currentUser.data.adminWa = pengaturan.adminWa;
+            }
+
+            var riwayat = [];
+            var sudahHadirHariIni = false;
+            var jamHadirHariIni = "";
+
+            presensiSnap.forEach(function(doc) {
+              var item = doc.data();
+              riwayat.push({
+                tanggal: item.tanggal || "-",
+                jam: item.jam || "-"
+              });
+              if (item.tanggal === todayStr) {
+                sudahHadirHariIni = true;
+                jamHadirHariIni = item.jam || "";
+              }
+            });
+
+            riwayat.sort(function(a, b) {
+              return String(b.tanggal).localeCompare(String(a.tanggal));
+            });
+
+            var jumlahPertemuan = riwayat.length;
+            var totalTagihan = jumlahPertemuan * biayaPerSesi;
+
+            var payData = bayarDoc.exists ? bayarDoc.data() : {};
+            var statusBayar = String(payData.statusBayar || "BELUM LUNAS").trim().toUpperCase();
+            var tglBayar = payData.tglBayar ? String(payData.tglBayar).trim() : "-";
+            var linkBukti = payData.linkBukti ? String(payData.linkBukti).trim() : "";
+
+            var res = {
+              currentMonth: currentMonth,
+              selectedMonth: targetMonth,
+              availableMonths: monthsList.map(function(m) { return { value: m }; }),
+              sudahHadirHariIni: sudahHadirHariIni,
+              jamHadirHariIni: jamHadirHariIni,
+              jumlahPertemuan: jumlahPertemuan,
+              biayaPerSesi: biayaPerSesi,
+              totalTagihan: totalTagihan,
+              statusBayar: statusBayar,
+              tglBayar: tglBayar,
+              linkBukti: linkBukti,
+              adminWa: pengaturan.adminWa,
+              riwayat: riwayat
+            };
+
             latestDashboard = res;
 
             var selectBulan = document.getElementById("select-bulan");
             selectBulan.textContent = "";
-            if (res.availableMonths && res.availableMonths.length > 0) {
-              for (var m = 0; m < res.availableMonths.length; m++) {
-                var opt = document.createElement("option");
-                opt.value = res.availableMonths[m].value;
-                opt.textContent = res.availableMonths[m].value;
-                if (res.availableMonths[m].value === res.selectedMonth) {
-                  opt.selected = true;
-                }
-                selectBulan.appendChild(opt);
+            for (var m = 0; m < res.availableMonths.length; m++) {
+              var opt = document.createElement("option");
+              opt.value = res.availableMonths[m].value;
+              opt.textContent = res.availableMonths[m].value;
+              if (res.availableMonths[m].value === res.selectedMonth) {
+                opt.selected = true;
               }
+              selectBulan.appendChild(opt);
             }
 
             var isCurrentMonth = (res.selectedMonth === res.currentMonth);
@@ -479,6 +675,9 @@ function callBackend(action, args) {
               document.getElementById("btn-presensi").classList.add("hidden");
               if (res.sudahHadirHariIni && isCurrentMonth) {
                 document.getElementById("box-sudah-hadir").classList.remove("hidden");
+                if (res.jamHadirHariIni) {
+                  document.getElementById("jam-hadir-info").textContent = "Tercatat pukul " + res.jamHadirHariIni;
+                }
               } else {
                 document.getElementById("box-sudah-hadir").classList.add("hidden");
               }
@@ -487,8 +686,8 @@ function callBackend(action, args) {
               document.getElementById("box-sudah-hadir").classList.add("hidden");
             }
 
-            document.getElementById("total-pertemuan").textContent = res.jumlahPertemuan || 0;
-            document.getElementById("nominal-tagihan-singkat").textContent = formatRp(res.totalTagihan || 0);
+            document.getElementById("total-pertemuan").textContent = res.jumlahPertemuan;
+            document.getElementById("nominal-tagihan-singkat").textContent = formatRp(res.totalTagihan);
 
             var badge = document.getElementById("badge-bayar-singkat");
             if (res.statusBayar === "LUNAS") {
@@ -499,10 +698,12 @@ function callBackend(action, args) {
               badge.className = "mt-1 text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700";
             }
 
+            applyInvoiceLunasSection(res);
+
             var listEl = document.getElementById("list-riwayat");
             listEl.textContent = "";
 
-            if (res.riwayat && res.riwayat.length > 0) {
+            if (res.riwayat.length > 0) {
               for (var i = 0; i < res.riwayat.length; i++) {
                 var r = res.riwayat[i];
                 var row = document.createElement("div");
@@ -527,148 +728,49 @@ function callBackend(action, args) {
               listEl.appendChild(empty);
             }
           })
-          .withFailureHandler(function() {
+          .catch(function() {
             setLoading(false);
-          })
-          .getSiswaDashboard(noReg, selectedMonth);
+          });
       }
 
       function klikPresensi() {
         if (!currentUser || !currentUser.data) return;
+        var noReg = String(currentUser.data.noReg);
+        var nama = String(currentUser.data.nama);
+        var todayStr = getTodayStr();
+        var monthStr = getCurrentMonthStr();
+        var jamStr = getNowJamStr();
+        var docId = noReg + "_" + todayStr;
+
         setLoading(true);
-        google.script.run
-          .withSuccessHandler(function(res) {
-            setLoading(false);
-            if (res && res.status === "success") {
-              document.getElementById("jam-hadir-info").textContent = "Tercatat pukul " + res.jam;
-              loadDashboard(currentUser.data.noReg, "");
-              showNotif("🎉", "Presensi Tercatat", "Kehadiran kamu hari ini pukul " + res.jam + " sudah masuk.");
-            } else {
-              showNotif("ℹ️", "Info Presensi", (res && res.message) ? res.message : "Gagal mencatat presensi.");
+        var presensiRef = db.collection("presensi").doc(docId);
+
+        presensiRef.get()
+          .then(function(doc) {
+            if (doc.exists) {
+              setLoading(false);
+              showNotif("ℹ️", "Info Presensi", "Kamu sudah tercatat hadir hari ini.");
+              loadDashboard(noReg, "");
+              return null;
             }
+
+            return presensiRef.set({
+              noReg: noReg,
+              nama: nama,
+              tanggal: todayStr,
+              jam: jamStr,
+              bulan: monthStr
+            }).then(function() {
+              setLoading(false);
+              document.getElementById("jam-hadir-info").textContent = "Tercatat pukul " + jamStr;
+              loadDashboard(noReg, "");
+              showNotif("🎉", "Presensi Tercatat", "Kehadiran kamu hari ini pukul " + jamStr + " sudah masuk.");
+            });
           })
-          .withFailureHandler(function() {
+          .catch(function() {
             setLoading(false);
-            showNotif("⚠️", "Gangguan Koneksi", "Gagal menghubungi server presensi.");
-          })
-          .submitPresensi(currentUser.data.noReg, currentUser.data.nama);
-      }
-      function updateInvoiceModal(siswaData, dashData) {
-        var isLunas = (String((dashData && dashData.statusBayar) || "").trim().toUpperCase() === "LUNAS");
-        var statusBadge = document.getElementById("inv-status");
-        var lunasBox = document.getElementById("inv-lunas-box");
-        var tglEl = document.getElementById("inv-tgl-bayar");
-        var buktiWrap = document.getElementById("inv-bukti-wrap");
-        var buktiLink = document.getElementById("inv-link-bukti");
-
-        document.getElementById("inv-nama").textContent = (siswaData && siswaData.nama) ? siswaData.nama : "-";
-        document.getElementById("inv-bulan").textContent = (dashData && dashData.selectedMonth) ? dashData.selectedMonth : "-";
-        document.getElementById("inv-sesi").textContent = ((dashData && dashData.jumlahPertemuan) ? dashData.jumlahPertemuan : 0) + "x";
-        document.getElementById("inv-tarif").textContent = formatRp(dashData && dashData.biayaPerSesi);
-        document.getElementById("inv-total").textContent = formatRp(dashData && dashData.totalTagihan);
-
-        if (isLunas) {
-          statusBadge.textContent = "LUNAS ✅";
-          statusBadge.className = "text-xs font-extrabold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700";
-
-          var tglBayar = (dashData && dashData.tglBayar && String(dashData.tglBayar).trim() !== "-")
-            ? String(dashData.tglBayar).trim()
-            : "-";
-          tglEl.textContent = tglBayar;
-
-          var rawBukti = (dashData && dashData.linkBukti) ? String(dashData.linkBukti).trim() : "";
-          if (/^https?:\/\//i.test(rawBukti)) {
-            buktiLink.href = rawBukti;
-            buktiWrap.classList.remove("hidden");
-          } else {
-            buktiLink.href = "#";
-            buktiWrap.classList.add("hidden");
-          }
-
-          lunasBox.classList.remove("hidden");
-        } else {
-          statusBadge.textContent = "BELUM LUNAS";
-          statusBadge.className = "text-xs font-extrabold px-2.5 py-1 rounded-lg bg-amber-100 text-amber-700";
-          lunasBox.classList.add("hidden");
-          buktiWrap.classList.add("hidden");
-          buktiLink.href = "#";
-          tglEl.textContent = "-";
-        }
-      }
-      function renderInvoiceLunasInfo(dashData) {
-        var boxLunas = document.getElementById("invoice-lunas-detail");
-        var elTgl = document.getElementById("invoice-tgl-bayar");
-        var rowBukti = document.getElementById("invoice-bukti-row");
-        var linkBukti = document.getElementById("invoice-link-bukti");
-
-        if (!boxLunas || !elTgl || !rowBukti || !linkBukti) return;
-
-        var isLunas = (String((dashData && dashData.statusBayar) || "").trim().toUpperCase() === "LUNAS");
-
-        if (!isLunas) {
-          boxLunas.classList.add("hidden");
-          rowBukti.classList.add("hidden");
-          linkBukti.href = "#";
-          elTgl.textContent = "-";
-          return;
-        }
-
-        var tglBayar = (dashData && dashData.tglBayar && String(dashData.tglBayar).trim() !== "-")
-          ? String(dashData.tglBayar).trim()
-          : "-";
-        elTgl.textContent = tglBayar;
-
-        var rawUrl = (dashData && dashData.linkBukti) ? String(dashData.linkBukti).trim() : "";
-        var isSafeUrl = /^https?:\/\//i.test(rawUrl);
-
-        if (isSafeUrl) {
-          linkBukti.href = rawUrl;
-          rowBukti.classList.remove("hidden");
-        } else {
-          linkBukti.href = "#";
-          rowBukti.classList.add("hidden");
-        }
-
-        boxLunas.classList.remove("hidden");
-      }
-      function applyInvoiceLunasSection(dashData) {
-        var lunasBox = document.getElementById("inv-lunas-box");
-        var tglEl = document.getElementById("inv-tgl-bayar");
-        var buktiWrap = document.getElementById("inv-bukti-wrap");
-        var buktiLink = document.getElementById("inv-link-bukti");
-        var statusEl = document.getElementById("inv-status");
-
-        if (!lunasBox || !tglEl || !buktiWrap || !buktiLink) return;
-
-        var statusText = statusEl ? String(statusEl.textContent || "").toUpperCase() : "";
-        var dataStatus = (dashData && dashData.statusBayar) ? String(dashData.statusBayar).toUpperCase() : "";
-        var isLunas = (dataStatus === "LUNAS" || statusText.indexOf("LUNAS") !== -1 && statusText.indexOf("BELUM") === -1);
-
-        if (!isLunas) {
-          lunasBox.classList.add("hidden");
-          buktiWrap.classList.add("hidden");
-          buktiLink.href = "#";
-          tglEl.textContent = "-";
-          return;
-        }
-
-        var tglBayar = (dashData && dashData.tglBayar) ? String(dashData.tglBayar).trim() : "";
-        // Jika tglBayar berupa ISO string atau format lain, ambil bagian yyyy-MM-dd bila ada
-        if (/^\d{4}-\d{2}-\d{2}/.test(tglBayar)) {
-          tglBayar = tglBayar.substring(0, 10);
-        }
-        tglEl.textContent = (tglBayar && tglBayar !== "-") ? tglBayar : "Tercatat LUNAS";
-
-        var rawBukti = (dashData && dashData.linkBukti) ? String(dashData.linkBukti).trim() : "";
-        if (/^https?:\/\//i.test(rawBukti)) {
-          buktiLink.href = rawBukti;
-          buktiWrap.classList.remove("hidden");
-        } else {
-          buktiLink.href = "#";
-          buktiWrap.classList.add("hidden");
-        }
-
-        lunasBox.classList.remove("hidden");
+            showNotif("⚠️", "Gangguan Koneksi", "Gagal mencatat presensi ke Firestore.");
+          });
       }
 
       function logout() {
