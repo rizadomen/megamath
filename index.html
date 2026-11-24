@@ -172,9 +172,9 @@
   <!-- DASHBOARD SISWA -->
   <div id="view-dashboard-siswa" class="w-full max-w-md hidden space-y-3.5 sm:space-y-4 pb-8">
     <div class="bg-gradient-to-r from-orange-50 to-amber-50/70 border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-5 flex items-center justify-between gap-3">
-      <div class="min-w-0">
-        <div class="flex items-center gap-2">
-          <img src="favicon-megamath.png" alt="Mega Math" class="w-8 h-6 object-contain mix-blend-multiply shrink-0">
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 min-w-0">
+          <img src="logo-megamath.png" alt="Mega Math" class="w-8 h-6 object-contain mix-blend-multiply shrink-0">
           <span id="siswa-noreg-badge" class="text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-200/70 text-orange-800 truncate">No. Reg: -</span>
         </div>
         <h2 id="siswa-nama" class="text-lg sm:text-xl font-extrabold text-slate-800 mt-1.5 truncate">Halo, Siswa!</h2>
@@ -199,13 +199,13 @@
 
       <button type="button" id="btn-presensi"
         class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white py-4 sm:py-5 px-4 rounded-3xl flex flex-col items-center justify-center gap-1 shadow-lg shadow-orange-500/30 transition">
-        <span class="text-3xl">✋</span>
-        <span class="text-lg sm:text-xl font-extrabold">KLIK HADIR LES</span>
-        <span class="text-[11px] sm:text-xs text-orange-100 font-medium">Tekan sekali saat mulai belajar</span>
+        <span class="text-3xl leading-none">✋</span>
+        <span class="text-lg sm:text-xl font-extrabold leading-tight">KLIK HADIR LES</span>
+        <span class="text-[11px] sm:text-xs text-orange-100 font-medium leading-snug">Tekan sekali saat mulai belajar</span>
       </button>
 
       <div id="box-sudah-hadir" class="hidden bg-emerald-50 border border-emerald-200 rounded-3xl p-4 sm:p-5">
-        <div class="text-3xl mb-1">🎉</div>
+        <div class="text-3xl leading-none mb-1.5">🎉</div>
         <p class="text-sm sm:text-base font-extrabold text-emerald-800">Hore! Kamu Sudah Hadir Hari Ini</p>
         <p id="jam-hadir-info" class="text-xs text-emerald-600 mt-0.5">Tercatat otomatis di sistem</p>
       </div>
@@ -214,17 +214,17 @@
     <!-- KARTU RINGKASAN PERTEMUAN & TAGIHAN -->
     <div class="grid grid-cols-2 gap-3">
       <div class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-3.5 sm:p-4 text-center flex flex-col justify-center items-center">
-        <span class="text-2xl">📅</span>
-        <p class="text-[11px] sm:text-xs font-bold text-slate-400 mt-1">Pertemuan Bulan Ini</p>
+        <span class="text-2xl leading-none">📅</span>
+        <p class="text-[11px] sm:text-xs font-bold text-slate-400 mt-1.5">Pertemuan Bulan Ini</p>
         <p class="text-xl sm:text-2xl font-extrabold text-orange-500 mt-0.5"><span id="total-pertemuan">0</span>x</p>
       </div>
 
       <button type="button" id="card-tagihan"
-        class="bg-white border-[1.5px] border-orange-100 hover:border-orange-300 shadow-lg shadow-orange-500/5 rounded-3xl p-3.5 sm:p-4 text-center flex flex-col justify-between items-center transition">
-        <span class="text-2xl">🧾</span>
-        <p class="text-[11px] sm:text-xs font-bold text-slate-400 mt-1">Tagihan Bulan Ini</p>
+        class="w-full bg-white border-[1.5px] border-orange-100 hover:border-orange-300 shadow-lg shadow-orange-500/5 rounded-3xl p-3.5 sm:p-4 text-center flex flex-col justify-center items-center transition">
+        <span class="text-2xl leading-none">🧾</span>
+        <p class="text-[11px] sm:text-xs font-bold text-slate-400 mt-1.5">Tagihan Bulan Ini</p>
         <p id="nominal-tagihan-singkat" class="text-sm font-extrabold text-slate-800 mt-0.5">Rp0</p>
-        <span id="badge-bayar-singkat" class="mt-1 text-[10px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700">
+        <span id="badge-bayar-singkat" class="mt-1.5 text-[10px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700">
           Klik Cek Invoice
         </span>
       </button>
