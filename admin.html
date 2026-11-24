@@ -97,6 +97,62 @@
     </div>
   </div>
 
+  <!-- MODAL KELOLA AKSES / HAPUS SISWA -->
+  <div id="modal-hapus-siswa" class="fixed inset-0 bg-slate-900/45 z-40 hidden items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-md bg-white border-[1.5px] border-rose-200 shadow-xl rounded-3xl p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-rose-100 pb-3">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-rose-600">Tindakan Data Siswa</span>
+          <h3 class="text-base sm:text-lg font-extrabold text-slate-800">Kelola Akses / Hapus Data</h3>
+        </div>
+        <button type="button" id="btn-tutup-hapus"
+          class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition">
+          ← Batal
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-100 text-xs space-y-1">
+        <div class="flex justify-between gap-2">
+          <span class="text-slate-500">Siswa</span>
+          <span id="hapus-info-siswa" class="font-extrabold text-slate-800 text-right">-</span>
+        </div>
+        <div class="flex justify-between gap-2">
+          <span class="text-slate-500">No. Registrasi</span>
+          <span id="hapus-info-noreg" class="font-extrabold text-rose-700">-</span>
+        </div>
+        <div class="flex justify-between gap-2">
+          <span class="text-slate-500">Status Akses Saat Ini</span>
+          <span id="hapus-info-akses" class="font-extrabold text-slate-800">-</span>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <button type="button" id="btn-toggle-akses-siswa"
+          class="w-full py-2.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-extrabold text-xs sm:text-sm transition">
+          🔒 Nonaktifkan Akses Login Siswa
+        </button>
+        <p class="text-[11px] text-slate-500 font-semibold">
+          Menonaktifkan akses hanya memblokir login siswa tanpa menghapus data tagihan dan presensi.
+        </p>
+      </div>
+
+      <form id="form-hapus-permanen" class="border-t border-rose-100 pt-3 space-y-3">
+        <div>
+          <label class="block text-xs font-extrabold text-rose-700 mb-1">
+            Hapus Permanen Data (Ketik <span id="hapus-noreg-hint" class="underline">-</span> untuk konfirmasi)
+          </label>
+          <input type="text" id="hapus-konfirmasi-input" placeholder="Ketik No. Registrasi siswa"
+            class="w-full px-3.5 py-2.5 rounded-2xl bg-rose-50/40 border border-rose-200 text-sm font-bold text-slate-800 focus:outline-none focus:border-rose-400">
+        </div>
+        <p id="hapus-error" class="text-xs font-bold text-rose-500 hidden"></p>
+        <button type="submit"
+          class="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-extrabold text-sm transition">
+          🗑️ Hapus Permanen Siswa &amp; Riwayat
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- LOGIN ADMIN -->
   <div id="view-login-admin" class="w-full max-w-md bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-5 sm:p-7 my-auto">
     <div class="text-center mb-6">
@@ -380,6 +436,7 @@
       var currentAdmin = null;
       var activeTab = "aktivasi";
       var pendingLunasTarget = null;
+      var pendingHapusTarget = null;
       var globalPengaturan = {
         namaBimbel: "Mega Math - Bimbel Private",
         adminWa: "6289611914296",
@@ -765,7 +822,7 @@
               "• No. Registrasi: *" + created.noReg + "*\n" +
               "• Password Default: *" + created.password + "*\n" +
               "• Biaya / Pertemuan: *" + formatRp(created.biayaPerSesi) + "*\n" +
-              "• Link Portal Siswa: https://rizadomen.github.io/megamath/\n" +
+              "• Link Portal Siswa: https://megamath.my.id/\n" +
               "Silakan login lalu ganti password bawaan ya."
             );
             document.getElementById("btn-kirim-wa-ortu").href = "https://wa.me/" + created.waOrtu + "?text=" + pesanWa;
@@ -920,6 +977,102 @@
           });
       }
 
+      function openHapusModal(item) {
+        pendingHapusTarget = item;
+        document.getElementById("hapus-info-siswa").textContent = item.nama + " (" + item.kelas + ")";
+        document.getElementById("hapus-info-noreg").textContent = item.noReg;
+        document.getElementById("hapus-noreg-hint").textContent = item.noReg;
+        document.getElementById("hapus-info-akses").textContent = item.statusAktif ? "AKTIF" : "NONAKTIF";
+        document.getElementById("hapus-konfirmasi-input").value = "";
+        document.getElementById("hapus-error").classList.add("hidden");
+
+        var btnToggle = document.getElementById("btn-toggle-akses-siswa");
+        btnToggle.textContent = item.statusAktif
+          ? "🔒 Nonaktifkan Akses Login Siswa"
+          : "🔓 Aktifkan Kembali Akses Login Siswa";
+
+        var modal = document.getElementById("modal-hapus-siswa");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeHapusModal() {
+        pendingHapusTarget = null;
+        var modal = document.getElementById("modal-hapus-siswa");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
+      function handleToggleAksesSiswa() {
+        if (!pendingHapusTarget) return;
+        var target = pendingHapusTarget;
+        var nextAktif = !target.statusAktif;
+
+        setLoading(true);
+        db.collection("siswa").doc(target.noReg).update({
+          statusAktif: nextAktif
+        })
+          .then(function() {
+            setLoading(false);
+            closeHapusModal();
+            showNotif(
+              nextAktif ? "🔓" : "🔒",
+              nextAktif ? "Akses Diaktifkan" : "Akses Dinonaktifkan",
+              "Akses login " + target.nama + " (" + target.noReg + ") kini " + (nextAktif ? "AKTIF" : "NONAKTIF") + "."
+            );
+            loadSiswaDanTagihan();
+          })
+          .catch(function() {
+            setLoading(false);
+            showNotif("⚠️", "Gagal", "Tidak dapat mengubah status akses siswa.");
+          });
+      }
+
+      function deleteDocsByQuery(queryRef) {
+        return queryRef.get().then(function(snap) {
+          if (snap.empty) return;
+          var batch = db.batch();
+          snap.forEach(function(doc) {
+            batch.delete(doc.ref);
+          });
+          return batch.commit();
+        });
+      }
+
+      function handleHapusPermanenSiswa(event) {
+        event.preventDefault();
+        if (!pendingHapusTarget) return;
+
+        var target = pendingHapusTarget;
+        var ketikan = String(document.getElementById("hapus-konfirmasi-input").value || "").trim();
+        var errEl = document.getElementById("hapus-error");
+        errEl.classList.add("hidden");
+
+        if (ketikan !== target.noReg) {
+          errEl.textContent = "Ketik persis No. Registrasi " + target.noReg + " untuk menghapus permanen.";
+          errEl.classList.remove("hidden");
+          return;
+        }
+
+        setLoading(true);
+        Promise.all([
+          deleteDocsByQuery(db.collection("presensi").where("noReg", "==", target.noReg)),
+          deleteDocsByQuery(db.collection("pembayaran").where("noReg", "==", target.noReg)),
+          db.collection("siswa").doc(target.noReg).delete()
+        ])
+          .then(function() {
+            setLoading(false);
+            closeHapusModal();
+            showNotif("🗑️", "Data Terhapus", "Data siswa " + target.nama + " (" + target.noReg + ") beserta riwayatnya telah dihapus.");
+            loadSiswaDanTagihan();
+          })
+          .catch(function() {
+            setLoading(false);
+            errEl.textContent = "Gagal menghapus data siswa. Periksa koneksi atau aturan Firestore.";
+            errEl.classList.remove("hidden");
+          });
+      }
+
       function batalkanLunas(item) {
         var docId = item.noReg + "_" + item.bulan;
         setLoading(true);
@@ -1014,6 +1167,7 @@
                 noReg: noReg,
                 nama: String(s.nama || "-"),
                 kelas: String(s.kelas || "-"),
+                statusAktif: s.statusAktif !== false,
                 bulan: bulan,
                 sesiTotal: sesiTotal,
                 sesiTerbayar: sesiTerbayar,
@@ -1072,6 +1226,13 @@
                 head.appendChild(regPill);
                 head.appendChild(namaTitle);
                 head.appendChild(statusPill);
+
+                if (!item.statusAktif) {
+                  var aksesPill = document.createElement("span");
+                  aksesPill.className = "text-[11px] font-extrabold px-2.5 py-0.5 rounded-lg bg-rose-100 text-rose-700";
+                  aksesPill.textContent = "AKSES NONAKTIF";
+                  head.appendChild(aksesPill);
+                }
 
                 var calcLine = document.createElement("div");
                 calcLine.className = "text-slate-600 font-semibold";
@@ -1134,6 +1295,15 @@
                   });
                   actions.appendChild(btnTandai);
                 }
+
+                var btnHapus = document.createElement("button");
+                btnHapus.type = "button";
+                btnHapus.className = "text-xs font-extrabold px-3 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition";
+                btnHapus.textContent = "Hapus / Akses";
+                btnHapus.addEventListener("click", function() {
+                  openHapusModal(item);
+                });
+                actions.appendChild(btnHapus);
 
                 card.appendChild(left);
                 card.appendChild(actions);
@@ -1362,6 +1532,9 @@
         document.getElementById("form-simpan-admin").addEventListener("submit", handleSimpanAkunAdmin);
         document.getElementById("btn-tutup-lunas").addEventListener("click", closeLunasModal);
         document.getElementById("form-konfirmasi-lunas").addEventListener("submit", handleKonfirmasiLunas);
+        document.getElementById("btn-tutup-hapus").addEventListener("click", closeHapusModal);
+        document.getElementById("btn-toggle-akses-siswa").addEventListener("click", handleToggleAksesSiswa);
+        document.getElementById("form-hapus-permanen").addEventListener("submit", handleHapusPermanenSiswa);
 
         try {
           var saved = sessionStorage.getItem("bimbel_admin_session");
