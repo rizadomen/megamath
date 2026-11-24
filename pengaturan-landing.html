@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#FB923C">
+  <link rel="icon" type="image/png" href="favicon-megamath.png">
+  <link rel="apple-touch-icon" href="favicon-megamath.png">
+  <title>Pengaturan Landing Page - Mega Math</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#FFFDF9] text-slate-800 px-3 py-4 sm:p-6">
+
+  <!-- LOADER -->
+  <div id="loader" class="fixed inset-0 bg-[#FFFDF9]/85 backdrop-blur-sm z-50 hidden flex-col items-center justify-center px-4">
+    <div class="w-11 h-11 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+    <p class="mt-3 text-xs sm:text-sm font-bold text-orange-600">Menyimpan pengaturan...</p>
+  </div>
+
+  <!-- MODAL NOTIF -->
+  <div id="modal-notif" class="fixed inset-0 bg-slate-900/45 z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-sm bg-white border-[1.5px] border-orange-200 shadow-xl rounded-3xl p-5 sm:p-6 text-center space-y-4">
+      <div id="notif-icon" class="text-4xl">✨</div>
+      <h3 id="notif-title" class="text-base sm:text-lg font-extrabold text-slate-800">Informasi</h3>
+      <p id="notif-message" class="text-xs text-slate-600 leading-relaxed font-semibold">-</p>
+      <button type="button" id="btn-tutup-notif"
+        class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white font-extrabold text-sm py-3 rounded-2xl shadow-md shadow-orange-500/25 transition">
+        Oke, Mengerti
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-3xl mx-auto space-y-4 pb-12">
+
+    <!-- HEADER -->
+    <div class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <img src="favicon-megamath.png" alt="Mega Math" class="w-11 h-9 object-contain mix-blend-multiply shrink-0">
+        <div class="min-w-0">
+          <h1 class="text-base sm:text-xl font-extrabold text-slate-800 truncate">Pengaturan Landing Page</h1>
+          <p class="text-[11px] sm:text-xs font-bold text-slate-500 truncate">Atur promosi &amp; daftar paket harga Mega Math</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="index.html" target="_blank" rel="noopener noreferrer"
+          class="text-xs font-extrabold px-3 py-2 rounded-xl border border-orange-200 text-orange-600 bg-orange-50/60 hover:bg-orange-100 transition">
+          Lihat Landing ↗
+        </a>
+        <a href="admin.html"
+          class="text-xs font-extrabold px-3.5 py-2 rounded-xl border border-orange-200 text-slate-700 bg-white hover:bg-orange-50 transition">
+          ← Kembali ke Admin
+        </a>
+      </div>
+    </div>
+
+    <!-- FORM PENGATURAN HERO & PAKET -->
+    <form id="form-landing-setting" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-6 text-xs">
+
+      <div class="space-y-3 border-b border-orange-100 pb-5">
+        <h2 class="text-xs font-extrabold uppercase tracking-wide text-orange-600">🎯 BAGIAN HERO &amp; PESAN WA</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Badge Promo Atas</label>
+            <input type="text" id="set-badge-promo" required
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Pesan Default Tombol Tanya Admin</label>
+            <input type="text" id="set-cta-wa" required
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Judul Utama Hero</label>
+          <input type="text" id="set-judul-hero" required
+            class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-extrabold text-sm text-slate-800 focus:outline-none focus:border-orange-400">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Subjudul / Deskripsi Singkat</label>
+          <textarea id="set-subjudul-hero" rows="2" required
+            class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-semibold text-slate-800 focus:outline-none focus:border-orange-400"></textarea>
+        </div>
+      </div>
+
+      <!-- DAFTAR PAKET -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-xs font-extrabold uppercase tracking-wide text-orange-600">💳 DAFTAR PAKET &amp; HARGA</h2>
+          <button type="button" id="btn-tambah-paket"
+            class="text-xs font-extrabold px-3.5 py-2 rounded-xl bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100 transition">
+            + Tambah Paket
+          </button>
+        </div>
+
+        <div id="paket-editor-list" class="space-y-3"></div>
+      </div>
+
+      <p id="setting-error" class="text-xs font-bold text-rose-500 hidden"></p>
+
+      <button type="submit"
+        class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold text-sm py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition">
+        💾 Simpan Pengaturan Landing Page
+      </button>
+    </form>
+
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    (function() {
+      var firebaseConfig = {
+        apiKey: "AIzaSyDmBlSBdeVPRO-AeUPQPEpDJzOLVE6fLUE",
+        authDomain: "mega-math-bimbel.firebaseapp.com",
+        projectId: "mega-math-bimbel",
+        storageBucket: "mega-math-bimbel.firebasestorage.app",
+        messagingSenderId: "1018677380626",
+        appId: "1:1018677380626:web:0f37cc89072d1816b57acb",
+        measurementId: "G-X3JBT00B7L"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.firestore();
+
+      var DEFAULT_LANDING = {
+        badgePromo: "Pendaftaran Kelas Baru Dibuka",
+        judulHero: "Bimbel Private yang Bikin Paham Konsep & Makin Percaya Diri",
+        subjudulHero: "Pendampingan belajar personal dan ramah anak untuk SD, SMP, dan SMA. Pantauan presensi dan tagihan transparan langsung melalui portal siswa.",
+        ctaWaTeks: "Halo Admin Mega Math, saya ingin tanya info paket & pendaftaran bimbel.",
+        paketList: [
+          {
+            id: "pkg-1",
+            namaPaket: "Paket Hemat 4x Sesi",
+            targetKelas: "SD / SMP / SMA",
+            hargaPerSesi: 100000,
+            jumlahSesi: 4,
+            deskripsi: "Cocok untuk coba kelas, pendampingan PR harian, dan pemantapan topik tertentu.",
+            badge: "Pilihan Awal",
+            unggulan: false
+          },
+          {
+            id: "pkg-2",
+            namaPaket: "Paket Reguler 8x Sesi",
+            targetKelas: "SD / SMP / SMA",
+            hargaPerSesi: 100000,
+            jumlahSesi: 8,
+            deskripsi: "Belajar rutin 2x seminggu dengan evaluasi berkala dan latihan soal terarah.",
+            badge: "Paling Diminati",
+            unggulan: true
+          }
+        ]
+      };
+
+      var paketItems = [];
+
+      function setLoading(show) {
+        var el = document.getElementById("loader");
+        if (!el) return;
+        if (show) {
+          el.classList.remove("hidden");
+          el.classList.add("flex");
+        } else {
+          el.classList.add("hidden");
+          el.classList.remove("flex");
+        }
+      }
+
+      function showNotif(icon, title, message) {
+        document.getElementById("notif-icon").textContent = icon || "✅";
+        document.getElementById("notif-title").textContent = title || "Informasi";
+        document.getElementById("notif-message").textContent = message || "";
+        var modal = document.getElementById("modal-notif");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeNotif() {
+        var modal = document.getElementById("modal-notif");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
+      function syncItemsFromDom() {
+        var rows = document.querySelectorAll("[data-paket-row]");
+        paketItems = [];
+        rows.forEach(function(row, idx) {
+          paketItems.push({
+            id: row.getAttribute("data-paket-id") || ("pkg-" + (idx + 1)),
+            namaPaket: String(row.querySelector(".pkg-nama").value || "").trim(),
+            targetKelas: String(row.querySelector(".pkg-kelas").value || "").trim(),
+            hargaPerSesi: Number(row.querySelector(".pkg-harga").value || 0),
+            jumlahSesi: Number(row.querySelector(".pkg-sesi").value || 0),
+            badge: String(row.querySelector(".pkg-badge").value || "").trim(),
+            deskripsi: String(row.querySelector(".pkg-desc").value || "").trim(),
+            unggulan: !!row.querySelector(".pkg-unggulan").checked
+          });
+        });
+      }
+
+      function renderPaketEditor() {
+        var container = document.getElementById("paket-editor-list");
+        container.textContent = "";
+
+        paketItems.forEach(function(pkg, index) {
+          var box = document.createElement("div");
+          box.setAttribute("data-paket-row", "1");
+          box.setAttribute("data-paket-id", pkg.id || ("pkg-" + (index + 1)));
+          box.className = "p-4 rounded-2xl bg-orange-50/40 border border-orange-200 space-y-3";
+
+          var head = document.createElement("div");
+          head.className = "flex items-center justify-between gap-2";
+
+          var labelTitle = document.createElement("span");
+          labelTitle.className = "font-extrabold text-slate-800";
+          labelTitle.textContent = "Paket #" + (index + 1);
+
+          var rightHead = document.createElement("div");
+          rightHead.className = "flex items-center gap-3";
+
+          var unggulanLabel = document.createElement("label");
+          unggulanLabel.className = "inline-flex items-center gap-1.5 font-extrabold text-orange-700 cursor-pointer";
+          var unggulanCb = document.createElement("input");
+          unggulanCb.type = "checkbox";
+          unggulanCb.className = "pkg-unggulan rounded border-orange-300 text-orange-600";
+          unggulanCb.checked = !!pkg.unggulan;
+          unggulanLabel.appendChild(unggulanCb);
+          unggulanLabel.appendChild(document.createTextNode("Paket Unggulan"));
+
+          var btnHapus = document.createElement("button");
+          btnHapus.type = "button";
+          btnHapus.className = "text-xs font-extrabold text-rose-600 hover:underline";
+          btnHapus.textContent = "Hapus";
+          btnHapus.addEventListener("click", function() {
+            syncItemsFromDom();
+            if (paketItems.length <= 1) {
+              showNotif("⚠️", "Minimal 1 Paket", "Sisakan minimal satu paket agar daftar harga tetap tampil.");
+              return;
+            }
+            paketItems.splice(index, 1);
+            renderPaketEditor();
+          });
+
+          rightHead.appendChild(unggulanLabel);
+          rightHead.appendChild(btnHapus);
+          head.appendChild(labelTitle);
+          head.appendChild(rightHead);
+
+          var g1 = document.createElement("div");
+          g1.className = "grid grid-cols-1 sm:grid-cols-2 gap-2.5";
+          g1.innerHTML =
+            '<input type="text" required placeholder="Nama Paket (misal: Paket 8x Pertemuan)" value="' + String(pkg.namaPaket || "").replace(/"/g, "&quot;") + '" ' +
+            'class="pkg-nama w-full px-3 py-2 rounded-xl bg-white border border-orange-200 font-bold text-slate-800">' +
+            '<input type="text" required placeholder="Jenjang / Target (misal: SD / SMP)" value="' + String(pkg.targetKelas || "").replace(/"/g, "&quot;") + '" ' +
+            'class="pkg-kelas w-full px-3 py-2 rounded-xl bg-white border border-orange-200 font-bold text-slate-800">';
+
+          var g2 = document.createElement("div");
+          g2.className = "grid grid-cols-1 sm:grid-cols-3 gap-2.5";
+          g2.innerHTML =
+            '<input type="number" min="1000" step="1000" required placeholder="Biaya / Sesi (Rp)" value="' + Number(pkg.hargaPerSesi || 100000) + '" ' +
+            'class="pkg-harga w-full px-3 py-2 rounded-xl bg-white border border-orange-200 font-bold text-slate-800">' +
+            '<input type="number" min="1" max="100" step="1" required placeholder="Jumlah Sesi" value="' + Number(pkg.jumlahSesi || 4) + '" ' +
+            'class="pkg-sesi w-full px-3 py-2 rounded-xl bg-white border border-orange-200 font-bold text-slate-800">' +
+            '<input type="text" placeholder="Label Badge (opsional)" value="' + String(pkg.badge || "").replace(/"/g, "&quot;") + '" ' +
+            'class="pkg-badge w-full px-3 py-2 rounded-xl bg-white border border-orange-200 font-bold text-slate-800">';
+
+          var descInput = document.createElement("input");
+          descInput.type = "text";
+          descInput.placeholder = "Deskripsi singkat paket";
+          descInput.value = pkg.deskripsi || "";
+          descInput.className = "pkg-desc w-full px-3 py-2 rounded-xl bg-white border border-orange-200 font-semibold text-slate-800";
+
+          box.appendChild(head);
+          box.appendChild(g1);
+          box.appendChild(g2);
+          box.appendChild(descInput);
+          container.appendChild(box);
+        });
+      }
+
+      function loadLandingSetting() {
+        setLoading(true);
+        db.collection("pengaturan").doc("landing").get()
+          .then(function(doc) {
+            setLoading(false);
+            var d = doc.exists ? Object.assign({}, DEFAULT_LANDING, doc.data()) : DEFAULT_LANDING;
+            document.getElementById("set-badge-promo").value = d.badgePromo || "";
+            document.getElementById("set-cta-wa").value = d.ctaWaTeks || "";
+            document.getElementById("set-judul-hero").value = d.judulHero || "";
+            document.getElementById("set-subjudul-hero").value = d.subjudulHero || "";
+            paketItems = Array.isArray(d.paketList) && d.paketList.length > 0
+              ? d.paketList.slice()
+              : DEFAULT_LANDING.paketList.slice();
+            renderPaketEditor();
+          })
+          .catch(function() {
+            setLoading(false);
+            paketItems = DEFAULT_LANDING.paketList.slice();
+            renderPaketEditor();
+          });
+      }
+
+      function handleSaveLanding(event) {
+        event.preventDefault();
+        syncItemsFromDom();
+
+        var errEl = document.getElementById("setting-error");
+        errEl.classList.add("hidden");
+
+        var badgePromo = String(document.getElementById("set-badge-promo").value || "").trim();
+        var ctaWaTeks = String(document.getElementById("set-cta-wa").value || "").trim();
+        var judulHero = String(document.getElementById("set-judul-hero").value || "").trim();
+        var subjudulHero = String(document.getElementById("set-subjudul-hero").value || "").trim();
+
+        if (!judulHero || paketItems.length === 0) {
+          errEl.textContent = "Judul utama dan minimal satu paket wajib diisi.";
+          errEl.classList.remove("hidden");
+          return;
+        }
+
+        setLoading(true);
+        db.collection("pengaturan").doc("landing").set({
+          badgePromo: badgePromo,
+          ctaWaTeks: ctaWaTeks,
+          judulHero: judulHero,
+          subjudulHero: subjudulHero,
+          paketList: paketItems
+        }, { merge: true })
+          .then(function() {
+            setLoading(false);
+            showNotif("🌐", "Tersimpan", "Pengaturan landing page dan daftar paket berhasil diperbarui.");
+          })
+          .catch(function() {
+            setLoading(false);
+            errEl.textContent = "Gagal menyimpan pengaturan. Periksa koneksi atau aturan Firestore.";
+            errEl.classList.remove("hidden");
+          });
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("btn-tutup-notif").addEventListener("click", closeNotif);
+        document.getElementById("btn-tambah-paket").addEventListener("click", function() {
+          syncItemsFromDom();
+          paketItems.push({
+            id: "pkg-" + Date.now(),
+            namaPaket: "",
+            targetKelas: "SD / SMP / SMA",
+            hargaPerSesi: 100000,
+            jumlahSesi: 4,
+            deskripsi: "",
+            badge: "",
+            unggulan: false
+          });
+          renderPaketEditor();
+        });
+        document.getElementById("form-landing-setting").addEventListener("submit", handleSaveLanding);
+        loadLandingSetting();
+      });
+    })();
+  </script>
+</body>
+</html>
