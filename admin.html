@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#FB923C">
+  <title>Admin - Mega Math Bimbel Private</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: #FFFDF9;
+      color: #1E293B;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .soft-card {
+      background: #FFFFFF;
+      border: 1.5px solid #FFEDD5;
+      box-shadow: 0 10px 25px -5px rgba(251, 146, 60, 0.08);
+      border-radius: 24px;
+    }
+    .btn-orange {
+      background: linear-gradient(135deg, #FB923C 0%, #F97316 100%);
+      box-shadow: 0 8px 20px -4px rgba(249, 115, 22, 0.35);
+      transition: transform 0.15s ease;
+    }
+    .btn-orange:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-6">
+
+  <!-- LOADING -->
+  <div id="loader" class="fixed inset-0 bg-[#FFFDF9]/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center">
+    <div class="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+    <p class="mt-3 text-sm font-bold text-orange-600">Memproses data...</p>
+  </div>
+
+  <!-- MODAL NOTIFIKASI -->
+  <div id="modal-notif" class="fixed inset-0 bg-slate-900/40 z-50 hidden items-center justify-center p-4">
+    <div class="w-full max-w-sm soft-card p-6 text-center space-y-4">
+      <div id="notif-icon" class="text-4xl">✨</div>
+      <h3 id="notif-title" class="text-lg font-extrabold text-slate-800">Informasi</h3>
+      <p id="notif-message" class="text-xs text-slate-600 leading-relaxed font-semibold">-</p>
+      <button type="button" id="btn-tutup-notif" class="w-full btn-orange text-white font-extrabold text-sm py-3 rounded-2xl">
+        Oke, Mengerti
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI LUNAS -->
+  <div id="modal-lunas" class="fixed inset-0 bg-slate-900/40 z-40 hidden items-center justify-center p-4">
+    <div class="w-full max-w-md soft-card p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-orange-100 pb-3">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Verifikasi Pembayaran</span>
+          <h3 class="text-lg font-extrabold text-slate-800">Konfirmasi Lunas</h3>
+        </div>
+        <button type="button" id="btn-tutup-lunas" class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-orange-50 text-orange-600">
+          Tutup
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-100 text-xs space-y-1">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Siswa</span>
+          <span id="lunas-info-siswa" class="font-extrabold text-slate-800">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Periode</span>
+          <span id="lunas-info-bulan" class="font-extrabold text-slate-800">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Total Tagihan</span>
+          <span id="lunas-info-total" class="font-extrabold text-orange-600">Rp0</span>
+        </div>
+      </div>
+
+      <form id="form-konfirmasi-lunas" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Tanggal Bayar</label>
+          <input type="date" id="lunas-tgl-bayar" required
+            class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Link Bukti Pembayaran (Google Drive / URL)</label>
+          <input type="url" id="lunas-link-bukti" placeholder="https://drive.google.com/..."
+            class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
+        </div>
+        <p id="lunas-error" class="text-xs font-bold text-rose-500 hidden"></p>
+        <button type="submit" class="w-full btn-orange text-white font-extrabold text-sm py-3 rounded-2xl">
+          ✅ Simpan Status LUNAS
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- LOGIN ADMIN -->
+  <div id="view-login-admin" class="w-full max-w-md soft-card p-7 my-auto">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl">
+        🛡️
+      </div>
+      <h1 class="text-2xl font-extrabold text-slate-800">Panel Admin</h1>
+      <p class="text-sm text-slate-500 mt-1">Mega Math - Bimbel Private</p>
+    </div>
+
+    <form id="form-login-admin" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">ID / Username Admin</label>
+        <input type="text" id="admin-id-input" required placeholder="Contoh: ADM01"
+          class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password Admin</label>
+        <input type="password" id="admin-pass-input" required placeholder="Masukkan password"
+          class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
+      </div>
+      <p id="admin-login-error" class="text-xs font-bold text-rose-500 hidden text-center"></p>
+      <button type="submit" class="w-full btn-orange text-white font-extrabold text-base py-3.5 rounded-2xl">
+        Masuk ke Admin 🚀
+      </button>
+    </form>
+  </div>
+
+  <!-- DASHBOARD ADMIN -->
+  <div id="view-dashboard-admin" class="w-full max-w-4xl hidden space-y-5 pb-10">
+    <!-- HEADER -->
+    <div class="soft-card p-5 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-orange-50 to-amber-50/60">
+      <div>
+        <span id="admin-badge" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-orange-200/70 text-orange-900">Admin: -</span>
+        <h2 class="text-xl font-extrabold text-slate-800 mt-1.5">Mega Math - Bimbel Private</h2>
+        <p class="text-xs font-semibold text-slate-500">Aktivasi siswa, verifikasi tagihan bulanan & pengaturan bimbel</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="./" class="text-xs font-extrabold px-3.5 py-2 rounded-xl bg-white border border-orange-200 text-orange-600">
+          Portal Siswa
+        </a>
+        <button type="button" id="btn-logout-admin" class="text-xs font-extrabold px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-rose-600">
+          Keluar
+        </button>
+      </div>
+    </div>
+
+    <!-- RINGKASAN CEPAT -->
+    <div class="grid grid-cols-3 gap-3">
+      <div class="soft-card p-4 text-center">
+        <p class="text-[11px] font-bold text-slate-400">Siswa Aktif</p>
+        <p id="stat-total-siswa" class="text-xl font-extrabold text-slate-800 mt-0.5">0</p>
+      </div>
+      <div class="soft-card p-4 text-center">
+        <p class="text-[11px] font-bold text-slate-400">Lunas Bulan Ini</p>
+        <p id="stat-total-lunas" class="text-xl font-extrabold text-emerald-600 mt-0.5">Rp0</p>
+      </div>
+      <div class="soft-card p-4 text-center">
+        <p class="text-[11px] font-bold text-slate-400">Belum Lunas</p>
+        <p id="stat-total-belum" class="text-xl font-extrabold text-orange-600 mt-0.5">Rp0</p>
+      </div>
+    </div>
+
+    <!-- GRID 2 KOLOM: AKTIVASI SISWA & PENGATURAN -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <!-- FORM AKTIVASI SISWA BARU -->
+      <div class="soft-card p-5 space-y-4">
+        <div class="border-b border-orange-100 pb-2.5">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-orange-500">Akun Baru</span>
+          <h3 class="text-base font-extrabold text-slate-800">Aktivasi Siswa & Generate No. Reg</h3>
+        </div>
+
+        <form id="form-aktivasi-siswa" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Nama Lengkap Siswa</label>
+            <input type="text" id="reg-nama" required placeholder="Contoh: Raka Pratama"
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 font-bold text-slate-800">
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Kelas</label>
+              <input type="text" id="reg-kelas" required placeholder="Contoh: 4 SD"
+                class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 font-bold text-slate-800">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Biaya / Pertemuan (Rp)</label>
+              <input type="number" id="reg-biaya" min="0" step="1000" required
+                class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 font-bold text-slate-800">
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">No. WA Orang Tua (format 628...)</label>
+            <input type="text" id="reg-wa-ortu" required placeholder="Contoh: 6281234567890"
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 font-bold text-slate-800">
+          </div>
+          <button type="submit" class="w-full btn-orange text-white font-extrabold text-xs py-3 rounded-2xl">
+            ✨ Generate No. Reg & Aktifkan Siswa
+          </button>
+        </form>
+
+        <!-- HASIL AKTIVASI & TOMBOL WA ORANG TUA -->
+        <div id="aktivasi-result-box" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2.5 text-xs">
+          <div class="font-extrabold text-emerald-900">Akun Siswa Berhasil Diaktifkan!</div>
+          <div class="space-y-1 text-emerald-800 font-semibold">
+            <div>No. Registrasi: <span id="res-noreg" class="font-extrabold">-</span></div>
+            <div>Password Default: <span id="res-pass" class="font-extrabold">-</span></div>
+            <div>Biaya / Pertemuan: <span id="res-biaya" class="font-extrabold">-</span></div>
+          </div>
+          <a id="btn-kirim-wa-ortu" href="#" target="_blank" rel="noopener noreferrer"
+            class="block text-center w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold">
+            📲 Kirim Info Akun ke WA Orang Tua
+          </a>
+        </div>
+      </div>
+
+      <!-- PENGATURAN GLOBAL -->
+      <div class="soft-card p-5 space-y-4">
+        <div class="border-b border-orange-100 pb-2.5">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-orange-500">Konfigurasi</span>
+          <h3 class="text-base font-extrabold text-slate-800">Pengaturan Bimbel (Global)</h3>
+        </div>
+
+        <form id="form-pengaturan" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Nama Bimbel</label>
+            <input type="text" id="set-nama-bimbel" required
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 font-bold text-slate-800">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Nomor WA Admin (format 628...)</label>
+            <input type="text" id="set-admin-wa" required
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 font-bold text-slate-800">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Biaya Default / Pertemuan (Rp)</label>
+            <input type="number" id="set-biaya-default" min="0" step="1000" required
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 font-bold text-slate-800">
+          </div>
+          <button type="submit" class="w-full btn-orange text-white font-extrabold text-xs py-3 rounded-2xl">
+            💾 Simpan Pengaturan
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- DAFTAR SISWA & TAGIHAN BULANAN -->
+    <div class="soft-card p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-orange-100 pb-3">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-orange-500">Rekap Bulanan</span>
+          <h3 class="text-base font-extrabold text-slate-800">Daftar Siswa & Tagihan</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="month" id="admin-filter-bulan"
+            class="text-xs font-extrabold bg-orange-50 border border-orange-200 text-orange-800 rounded-xl px-3 py-2">
+          <button type="button" id="btn-refresh-admin"
+            class="text-xs font-extrabold bg-white border border-orange-200 text-orange-600 rounded-xl px-3 py-2">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <div id="admin-daftar-siswa" class="space-y-3 text-xs">
+        <p class="text-slate-400 text-center py-4">Memuat data siswa...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIREBASE COMPAT SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    (function() {
+      var firebaseConfig = {
+        apiKey: "AIzaSyDmBlSBdeVPRO-AeUPQPEpDJzOLVE6fLUE",
+        authDomain: "mega-math-bimbel.firebaseapp.com",
+        projectId: "mega-math-bimbel",
+        storageBucket: "mega-math-bimbel.firebasestorage.app",
+        messagingSenderId: "1018677380626",
+        appId: "1:1018677380626:web:0f37cc89072d1816b57acb",
+        measurementId: "G-X3JBT00B7L"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.firestore();
+
+      var currentAdmin = null;
+      var globalPengaturan = {
+        namaBimbel: "Mega Math - Bimbel Private",
+        adminWa: "6289611914296",
+        biayaDefault: 120000
+      };
+      var pendingLunasTarget = null;
+
+      function pad2(n) {
+        return n < 10 ? "0" + n : String(n);
+      }
+
+      function getTodayStr() {
+        var now = new Date();
+        return now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-" + pad2(now.getDate());
+      }
+
+      function getCurrentMonthStr() {
+        return getTodayStr().slice(0, 7);
+      }
+
+      function sanitizeWa(raw) {
+        var digits = String(raw || "").replace(/\D/g, "");
+        if (digits.indexOf("0") === 0) {
+          digits = "62" + digits.slice(1);
+        }
+        return digits;
+      }
+
+      function formatRp(num) {
+        return "Rp" + Number(num || 0).toLocaleString("id-ID");
+      }
+
+      function setLoading(show) {
+        var el = document.getElementById("loader");
+        if (!el) return;
+        if (show) {
+          el.classList.remove("hidden");
+          el.classList.add("flex");
+        } else {
+          el.classList.add("hidden");
+          el.classList.remove("flex");
+        }
+      }
+
+      function showNotif(icon, title, message) {
+        document.getElementById("notif-icon").textContent = icon || "✅";
+        document.getElementById("notif-title").textContent = title || "Informasi";
+        document.getElementById("notif-message").textContent = message || "";
+        var modal = document.getElementById("modal-notif");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeNotif() {
+        var modal = document.getElementById("modal-notif");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
+      function loadPengaturan() {
+        return db.collection("pengaturan").doc("global").get()
+          .then(function(doc) {
+            if (doc.exists) {
+              var p = doc.data();
+              globalPengaturan = {
+                namaBimbel: p.namaBimbel || "Mega Math - Bimbel Private",
+                adminWa: sanitizeWa(p.adminWa || "6289611914296"),
+                biayaDefault: Number(p.biayaDefault) > 0 ? Number(p.biayaDefault) : 120000
+              };
+            }
+            document.getElementById("set-nama-bimbel").value = globalPengaturan.namaBimbel;
+            document.getElementById("set-admin-wa").value = globalPengaturan.adminWa;
+            document.getElementById("set-biaya-default").value = globalPengaturan.biayaDefault;
+            if (!document.getElementById("reg-biaya").value) {
+              document.getElementById("reg-biaya").value = globalPengaturan.biayaDefault;
+            }
+            return globalPengaturan;
+          });
+      }
+
+      function handleSavePengaturan(event) {
+        event.preventDefault();
+        var namaBimbel = String(document.getElementById("set-nama-bimbel").value || "").trim();
+        var adminWa = sanitizeWa(document.getElementById("set-admin-wa").value);
+        var biayaDefault = Number(document.getElementById("set-biaya-default").value || 0);
+
+        setLoading(true);
+        db.collection("pengaturan").doc("global").set({
+          namaBimbel: namaBimbel,
+          adminWa: adminWa,
+          biayaDefault: biayaDefault
+        }, { merge: true })
+          .then(function() {
+            setLoading(false);
+            globalPengaturan = { namaBimbel: namaBimbel, adminWa: adminWa, biayaDefault: biayaDefault };
+            document.getElementById("reg-biaya").value = biayaDefault;
+            showNotif("💾", "Pengaturan Tersimpan", "Konfigurasi global bimbel sudah diperbarui.");
+            loadAdminRekap();
+          })
+          .catch(function() {
+            setLoading(false);
+            showNotif("⚠️", "Gagal Menyimpan", "Tidak dapat memperbarui pengaturan.");
+          });
+      }
+
+      function generateUniqueNoReg() {
+        var now = new Date();
+        var prefix = now.getFullYear() + pad2(now.getMonth() + 1) + pad2(now.getDate());
+
+        return db.collection("siswa")
+          .where("noReg", ">=", prefix + "000")
+          .where("noReg", "<=", prefix + "999")
+          .get()
+          .then(function(snap) {
+            var maxSeq = 0;
+            snap.forEach(function(doc) {
+              var reg = String(doc.id || doc.data().noReg || "");
+              if (reg.indexOf(prefix) === 0) {
+                var seq = parseInt(reg.slice(prefix.length), 10);
+                if (!isNaN(seq) && seq > maxSeq) {
+                  maxSeq = seq;
+                }
+              }
+            });
+            return prefix + String(maxSeq + 1).padStart(3, "0");
+          })
+          .catch(function() {
+            var rand = Math.floor(100 + Math.random() * 899);
+            return prefix + String(rand);
+          });
+      }
+
+      function handleAktivasiSiswa(event) {
+        event.preventDefault();
+        var nama = String(document.getElementById("reg-nama").value || "").trim();
+        var kelas = String(document.getElementById("reg-kelas").value || "").trim();
+        var biayaPerSesi = Number(document.getElementById("reg-biaya").value || 0);
+        var waOrtu = sanitizeWa(document.getElementById("reg-wa-ortu").value);
+
+        if (!nama || !kelas) return;
+        setLoading(true);
+
+        generateUniqueNoReg()
+          .then(function(noReg) {
+            var defaultPass = noReg;
+            return db.collection("siswa").doc(noReg).set({
+              noReg: noReg,
+              nama: nama,
+              kelas: kelas,
+              password: defaultPass,
+              biayaPerSesi: biayaPerSesi,
+              waOrtu: waOrtu,
+              statusAktif: true,
+              mustChangePassword: true
+            }).then(function() {
+              return {
+                noReg: noReg,
+                nama: nama,
+                kelas: kelas,
+                password: defaultPass,
+                biayaPerSesi: biayaPerSesi,
+                waOrtu: waOrtu
+              };
+            });
+          })
+          .then(function(created) {
+            setLoading(false);
+            document.getElementById("res-noreg").textContent = created.noReg;
+            document.getElementById("res-pass").textContent = created.password;
+            document.getElementById("res-biaya").textContent = formatRp(created.biayaPerSesi) + " / pertemuan";
+
+            var pesanWa = encodeURIComponent(
+              "Halo Ayah/Bunda, akun *Mega Math - Bimbel Private* untuk *" + created.nama + "* (" + created.kelas + ") sudah aktif:\n" +
+              "• No. Registrasi: *" + created.noReg + "*\n" +
+              "• Password Default: *" + created.password + "*\n" +
+              "• Biaya / Pertemuan: *" + formatRp(created.biayaPerSesi) + "*\n" +
+              "• Link Portal Siswa: https://rizadomen.github.io/megamath/\n" +
+              "Silakan login lalu ganti password bawaan demi keamanan ya."
+            );
+            var waBtn = document.getElementById("btn-kirim-wa-ortu");
+            waBtn.href = created.waOrtu ? ("https://wa.me/" + created.waOrtu + "?text=" + pesanWa) : "#";
+
+            document.getElementById("aktivasi-result-box").classList.remove("hidden");
+            document.getElementById("reg-nama").value = "";
+            document.getElementById("reg-kelas").value = "";
+            document.getElementById("reg-wa-ortu").value = "";
+
+            loadAdminRekap();
+          })
+          .catch(function() {
+            setLoading(false);
+            showNotif("⚠️", "Gagal Aktivasi", "Terjadi kesalahan saat menyimpan akun siswa baru.");
+          });
+      }
+
+      function openLunasModal(item) {
+        pendingLunasTarget = item;
+        document.getElementById("lunas-info-siswa").textContent = item.nama + " (" + item.noReg + ")";
+        document.getElementById("lunas-info-bulan").textContent = item.bulan;
+        document.getElementById("lunas-info-total").textContent = formatRp(item.totalTagihan);
+        document.getElementById("lunas-tgl-bayar").value = item.tglBayar && item.tglBayar !== "-" ? item.tglBayar : getTodayStr();
+        document.getElementById("lunas-link-bukti").value = item.linkBukti || "";
+        document.getElementById("lunas-error").classList.add("hidden");
+
+        var modal = document.getElementById("modal-lunas");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeLunasModal() {
+        pendingLunasTarget = null;
+        var modal = document.getElementById("modal-lunas");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
+      function handleKonfirmasiLunas(event) {
+        event.preventDefault();
+        if (!pendingLunasTarget || !currentAdmin) return;
+
+        var tglBayar = String(document.getElementById("lunas-tgl-bayar").value || "").trim();
+        var linkBukti = String(document.getElementById("lunas-link-bukti").value || "").trim();
+        var errEl = document.getElementById("lunas-error");
+        errEl.classList.add("hidden");
+
+        if (!tglBayar) {
+          errEl.textContent = "Tanggal bayar wajib diisi.";
+          errEl.classList.remove("hidden");
+          return;
+        }
+
+        var docId = pendingLunasTarget.noReg + "_" + pendingLunasTarget.bulan;
+        setLoading(true);
+
+        db.collection("pembayaran").doc(docId).set({
+          noReg: pendingLunasTarget.noReg,
+          bulan: pendingLunasTarget.bulan,
+          statusBayar: "LUNAS",
+          tglBayar: tglBayar,
+          linkBukti: linkBukti,
+          verifiedBy: currentAdmin.nama,
+          verifiedAdminId: currentAdmin.id
+        }, { merge: true })
+          .then(function() {
+            setLoading(false);
+            closeLunasModal();
+            showNotif("✅", "Tagihan Lunas", "Pembayaran " + pendingLunasTarget.nama + " (" + pendingLunasTarget.bulan + ") sudah tercatat LUNAS.");
+            loadAdminRekap();
+          })
+          .catch(function() {
+            setLoading(false);
+            errEl.textContent = "Gagal menyimpan status lunas ke Firestore.";
+            errEl.classList.remove("hidden");
+          });
+      }
+
+      function loadAdminRekap() {
+        var bulan = document.getElementById("admin-filter-bulan").value || getCurrentMonthStr();
+        document.getElementById("admin-filter-bulan").value = bulan;
+
+        setLoading(true);
+        Promise.all([
+          loadPengaturan(),
+          db.collection("siswa").get(),
+          db.collection("presensi").where("bulan", "==", bulan).get(),
+          db.collection("pembayaran").where("bulan", "==", bulan).get()
+        ])
+          .then(function(results) {
+            setLoading(false);
+            var pengaturan = results[0];
+            var siswaSnap = results[1];
+            var presensiSnap = results[2];
+            var bayarSnap = results[3];
+
+            var sesiMap = {};
+            presensiSnap.forEach(function(doc) {
+              var p = doc.data();
+              var reg = String(p.noReg || "");
+              if (!reg) return;
+              sesiMap[reg] = (sesiMap[reg] || 0) + 1;
+            });
+
+            var bayarMap = {};
+            bayarSnap.forEach(function(doc) {
+              var b = doc.data();
+              var reg = String(b.noReg || doc.id.split("_")[0] || "");
+              if (!reg) return;
+              bayarMap[reg] = b;
+            });
+
+            var rows = [];
+            var aktifCount = 0;
+            var totalLunas = 0;
+            var totalBelum = 0;
+
+            siswaSnap.forEach(function(doc) {
+              var s = doc.data();
+              var noReg = String(s.noReg || doc.id);
+              var isAktif = s.statusAktif !== false;
+              if (isAktif) aktifCount++;
+
+              var tarif = Number(s.biayaPerSesi) > 0 ? Number(s.biayaPerSesi) : pengaturan.biayaDefault;
+              var jumlahSesi = sesiMap[noReg] || 0;
+              var totalTagihan = jumlahSesi * tarif;
+
+              var pay = bayarMap[noReg] || {};
+              var statusBayar = String(pay.statusBayar || "BELUM LUNAS").trim().toUpperCase();
+              var isLunas = (statusBayar === "LUNAS");
+
+              if (isLunas) {
+                totalLunas += totalTagihan;
+              } else {
+                totalBelum += totalTagihan;
+              }
+
+              rows.push({
+                noReg: noReg,
+                nama: String(s.nama || "-"),
+                kelas: String(s.kelas || "-"),
+                waOrtu: sanitizeWa(s.waOrtu || ""),
+                bulan: bulan,
+                jumlahSesi: jumlahSesi,
+                tarif: tarif,
+                totalTagihan: totalTagihan,
+                statusBayar: isLunas ? "LUNAS" : "BELUM LUNAS",
+                tglBayar: pay.tglBayar ? String(pay.tglBayar) : "-",
+                linkBukti: pay.linkBukti ? String(pay.linkBukti) : "",
+                statusAktif: isAktif
+              });
+            });
+
+            rows.sort(function(a, b) {
+              return a.noReg.localeCompare(b.noReg);
+            });
+
+            document.getElementById("stat-total-siswa").textContent = aktifCount;
+            document.getElementById("stat-total-lunas").textContent = formatRp(totalLunas);
+            document.getElementById("stat-total-belum").textContent = formatRp(totalBelum);
+
+            var listContainer = document.getElementById("admin-daftar-siswa");
+            listContainer.textContent = "";
+
+            if (rows.length === 0) {
+              var emptyEl = document.createElement("p");
+              emptyEl.className = "text-slate-400 text-center py-4";
+              emptyEl.textContent = "Belum ada data siswa terdaftar.";
+              listContainer.appendChild(emptyEl);
+              return;
+            }
+
+            for (var i = 0; i < rows.length; i++) {
+              (function(item) {
+                var card = document.createElement("div");
+                card.className = "p-4 rounded-2xl bg-orange-50/40 border border-orange-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+
+                var left = document.createElement("div");
+                left.className = "space-y-1";
+
+                var titleRow = document.createElement("div");
+                titleRow.className = "flex items-center gap-2 flex-wrap";
+
+                var namaEl = document.createElement("span");
+                namaEl.className = "font-extrabold text-sm text-slate-800";
+                namaEl.textContent = item.nama;
+
+                var regBadge = document.createElement("span");
+                regBadge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700";
+                regBadge.textContent = item.noReg + " • " + item.kelas;
+
+                var statusBadge = document.createElement("span");
+                if (item.statusBayar === "LUNAS") {
+                  statusBadge.className = "text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-700";
+                  statusBadge.textContent = "LUNAS ✅ (" + item.tglBayar + ")";
+                } else {
+                  statusBadge.className = "text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700";
+                  statusBadge.textContent = "BELUM LUNAS";
+                }
+
+                titleRow.appendChild(namaEl);
+                titleRow.appendChild(regBadge);
+                titleRow.appendChild(statusBadge);
+
+                var metaEl = document.createElement("div");
+                metaEl.className = "text-slate-600 font-semibold";
+                metaEl.textContent = item.jumlahSesi + "x pertemuan × " + formatRp(item.tarif) + " = " + formatRp(item.totalTagihan);
+
+                left.appendChild(titleRow);
+                left.appendChild(metaEl);
+
+                if (item.statusBayar === "LUNAS" && /^https?:\/\//i.test(item.linkBukti)) {
+                  var buktiA = document.createElement("a");
+                  buktiA.href = item.linkBukti;
+                  buktiA.target = "_blank";
+                  buktiA.rel = "noopener noreferrer";
+                  buktiA.className = "inline-block text-orange-600 font-extrabold underline mt-0.5";
+                  buktiA.textContent = "📎 Lihat Bukti Pembayaran";
+                  left.appendChild(buktiA);
+                }
+
+                var right = document.createElement("div");
+                right.className = "flex items-center gap-2 shrink-0";
+
+                var btnLunas = document.createElement("button");
+                btnLunas.type = "button";
+                btnLunas.className = "btn-orange text-white font-extrabold px-3.5 py-2 rounded-xl";
+                btnLunas.textContent = item.statusBayar === "LUNAS" ? "Edit Lunas" : "Tandai Lunas";
+                btnLunas.addEventListener("click", function() {
+                  openLunasModal(item);
+                });
+
+                right.appendChild(btnLunas);
+                card.appendChild(left);
+                card.appendChild(right);
+                listContainer.appendChild(card);
+              })(rows[i]);
+            }
+          })
+          .catch(function() {
+            setLoading(false);
+            showNotif("⚠️", "Gangguan Koneksi", "Gagal memuat data siswa dan tagihan.");
+          });
+      }
+
+      function enterAdminDashboard(adminObj) {
+        currentAdmin = adminObj;
+        try {
+          sessionStorage.setItem("bimbel_admin_session", JSON.stringify(adminObj));
+        } catch (e) {}
+
+        document.getElementById("admin-badge").textContent = "Admin: " + adminObj.nama + " (" + adminObj.id + ")";
+        document.getElementById("view-login-admin").classList.add("hidden");
+        document.getElementById("view-dashboard-admin").classList.remove("hidden");
+
+        if (!document.getElementById("admin-filter-bulan").value) {
+          document.getElementById("admin-filter-bulan").value = getCurrentMonthStr();
+        }
+        loadAdminRekap();
+      }
+
+      function handleLoginAdmin(event) {
+        event.preventDefault();
+        var adminId = String(document.getElementById("admin-id-input").value || "").trim();
+        var pass = String(document.getElementById("admin-pass-input").value || "");
+        var errEl = document.getElementById("admin-login-error");
+        errEl.classList.add("hidden");
+
+        setLoading(true);
+        db.collection("admin").doc(adminId).get()
+          .then(function(doc) {
+            setLoading(false);
+            if (doc.exists) {
+              var a = doc.data();
+              if (a.aktif === false) {
+                errEl.textContent = "Akun admin ini sedang nonaktif.";
+                errEl.classList.remove("hidden");
+                return;
+              }
+              if (String(a.password || "") !== pass) {
+                errEl.textContent = "Password admin salah.";
+                errEl.classList.remove("hidden");
+                return;
+              }
+              enterAdminDashboard({
+                id: String(a.id || doc.id),
+                nama: String(a.nama || doc.id)
+              });
+              return;
+            }
+
+            // Fallback awal jika koleksi admin belum diisi di Firestore
+            if (adminId.toUpperCase() === "ADMIN01" && pass === "admin123") {
+              enterAdminDashboard({ id: "ADMIN01", nama: "Admin Mega Math" });
+            } else {
+              errEl.textContent = "Akun admin tidak ditemukan.";
+              errEl.classList.remove("hidden");
+            }
+          })
+          .catch(function() {
+            setLoading(false);
+            errEl.textContent = "Gagal menghubungi Firestore.";
+            errEl.classList.remove("hidden");
+          });
+      }
+
+      function handleLogoutAdmin() {
+        currentAdmin = null;
+        try {
+          sessionStorage.removeItem("bimbel_admin_session");
+        } catch (e) {}
+        document.getElementById("view-dashboard-admin").classList.add("hidden");
+        document.getElementById("view-login-admin").classList.remove("hidden");
+        document.getElementById("admin-pass-input").value = "";
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("btn-tutup-notif").addEventListener("click", closeNotif);
+        document.getElementById("form-login-admin").addEventListener("submit", handleLoginAdmin);
+        document.getElementById("btn-logout-admin").addEventListener("click", handleLogoutAdmin);
+        document.getElementById("form-aktivasi-siswa").addEventListener("submit", handleAktivasiSiswa);
+        document.getElementById("form-pengaturan").addEventListener("submit", handleSavePengaturan);
+        document.getElementById("btn-refresh-admin").addEventListener("click", loadAdminRekap);
+        document.getElementById("admin-filter-bulan").addEventListener("change", loadAdminRekap);
+        document.getElementById("btn-tutup-lunas").addEventListener("click", closeLunasModal);
+        document.getElementById("form-konfirmasi-lunas").addEventListener("submit", handleKonfirmasiLunas);
+
+        try {
+          var saved = sessionStorage.getItem("bimbel_admin_session");
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed && parsed.id) {
+              enterAdminDashboard(parsed);
+            }
+          }
+        } catch (e) {}
+      });
+    })();
+  </script>
+</body>
+</html>
