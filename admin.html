@@ -2,94 +2,70 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#FB923C">
+  <link rel="icon" type="image/png" href="logo-megamath.png">
+  <link rel="apple-touch-icon" href="logo-megamath.png">
   <title>Panel Admin Bimbel - Mega Math</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/jpeg" href="favicon-megamath.jpg">
-  <link rel="apple-touch-icon" href="favicon-megamath.jpg">
   <style>
     body {
       font-family: 'Nunito', sans-serif;
-      background-color: #FFFDF9;
-      color: #1E293B;
       -webkit-tap-highlight-color: transparent;
-    }
-    .soft-card {
-      background: #FFFFFF;
-      border: 1.5px solid #FFEDD5;
-      box-shadow: 0 10px 25px -5px rgba(251, 146, 60, 0.08);
-      border-radius: 24px;
-    }
-    .btn-orange {
-      background: linear-gradient(135deg, #FB923C 0%, #F97316 100%);
-      box-shadow: 0 6px 16px -4px rgba(249, 115, 22, 0.35);
-      transition: transform 0.15s ease;
-    }
-    .btn-orange:active {
-      transform: scale(0.98);
-    }
-    .tab-active {
-      background: linear-gradient(135deg, #FB923C 0%, #F97316 100%);
-      color: #FFFFFF;
-      border-color: transparent;
-      box-shadow: 0 6px 16px -4px rgba(249, 115, 22, 0.3);
-    }
-    .tab-idle {
-      background: #FFFFFF;
-      color: #475569;
-      border: 1.5px solid #FDBA74;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-6">
+<body class="min-h-screen bg-[#FFFDF9] text-slate-800 flex flex-col items-center justify-start px-3 py-4 sm:p-6">
 
   <!-- LOADING -->
-  <div id="loader" class="fixed inset-0 bg-[#FFFDF9]/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center">
-    <div class="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
-    <p class="mt-3 text-sm font-bold text-orange-600">Memproses data...</p>
+  <div id="loader" class="fixed inset-0 bg-[#FFFDF9]/85 backdrop-blur-sm z-50 hidden flex-col items-center justify-center px-4">
+    <div class="w-11 h-11 sm:w-12 sm:h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+    <p class="mt-3 text-xs sm:text-sm font-bold text-orange-600">Memproses data...</p>
   </div>
 
   <!-- MODAL NOTIFIKASI -->
-  <div id="modal-notif" class="fixed inset-0 bg-slate-900/40 z-50 hidden items-center justify-center p-4">
-    <div class="w-full max-w-sm soft-card p-6 text-center space-y-4">
+  <div id="modal-notif" class="fixed inset-0 bg-slate-900/45 z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-sm bg-white border-[1.5px] border-orange-200 shadow-xl rounded-3xl p-5 sm:p-6 text-center space-y-4">
       <div id="notif-icon" class="text-4xl">✨</div>
-      <h3 id="notif-title" class="text-lg font-extrabold text-slate-800">Informasi</h3>
+      <h3 id="notif-title" class="text-base sm:text-lg font-extrabold text-slate-800">Informasi</h3>
       <p id="notif-message" class="text-xs text-slate-600 leading-relaxed font-semibold">-</p>
-      <button type="button" id="btn-tutup-notif" class="w-full btn-orange text-white font-extrabold text-sm py-3 rounded-2xl">
+      <button type="button" id="btn-tutup-notif"
+        class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold text-sm py-3 rounded-2xl shadow-md shadow-orange-500/25 transition">
         Oke, Mengerti
       </button>
     </div>
   </div>
 
   <!-- MODAL KONFIRMASI LUNAS -->
-  <div id="modal-lunas" class="fixed inset-0 bg-slate-900/40 z-40 hidden items-center justify-center p-4">
-    <div class="w-full max-w-md soft-card p-6 space-y-4">
+  <div id="modal-lunas" class="fixed inset-0 bg-slate-900/45 z-40 hidden items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-md bg-white border-[1.5px] border-orange-200 shadow-xl rounded-3xl p-5 sm:p-6 space-y-4">
       <div class="flex items-center justify-between border-b border-orange-100 pb-3">
         <div>
           <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Verifikasi Pembayaran</span>
-          <h3 class="text-lg font-extrabold text-slate-800">Tandai LUNAS</h3>
+          <h3 class="text-base sm:text-lg font-extrabold text-slate-800">Tandai LUNAS</h3>
         </div>
-        <button type="button" id="btn-tutup-lunas" class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-orange-50 text-orange-600">
+        <button type="button" id="btn-tutup-lunas"
+          class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition">
           ← Kembali
         </button>
       </div>
 
       <div class="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-100 text-xs space-y-1">
-        <div class="flex justify-between">
+        <div class="flex justify-between gap-2">
           <span class="text-slate-500">Siswa</span>
-          <span id="lunas-info-siswa" class="font-extrabold text-slate-800">-</span>
+          <span id="lunas-info-siswa" class="font-extrabold text-slate-800 text-right">-</span>
         </div>
-        <div class="flex justify-between">
+        <div class="flex justify-between gap-2">
           <span class="text-slate-500">Periode</span>
           <span id="lunas-info-bulan" class="font-extrabold text-slate-800">-</span>
         </div>
-        <div class="flex justify-between">
+        <div class="flex justify-between gap-2">
           <span class="text-slate-500">Sesi Dilunasi</span>
-          <span id="lunas-info-sesi" class="font-extrabold text-slate-800">0 pertemuan</span>
+          <span id="lunas-info-sesi" class="font-extrabold text-slate-800 text-right">0 pertemuan</span>
         </div>
-        <div class="flex justify-between">
+        <div class="flex justify-between gap-2">
           <span class="text-slate-500">Nominal Tagihan</span>
           <span id="lunas-info-total" class="font-extrabold text-orange-600">Rp0</span>
         </div>
@@ -107,7 +83,8 @@
             class="w-full px-3.5 py-2.5 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
         </div>
         <p id="lunas-error" class="text-xs font-bold text-rose-500 hidden"></p>
-        <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm">
+        <button type="submit"
+          class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold text-sm transition">
           ✅ Simpan Status LUNAS
         </button>
       </form>
@@ -115,80 +92,86 @@
   </div>
 
   <!-- LOGIN ADMIN -->
-  <div id="view-login-admin" class="w-full max-w-md soft-card p-7 my-auto">
+  <div id="view-login-admin" class="w-full max-w-md bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-5 sm:p-7 my-auto">
     <div class="text-center mb-6">
-      <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-3xl">
-        <img src="logo-megamath.png" alt="Logo Mega Math" class="w-36 h-20 mx-auto mb-3 rounded-2xl object-contain bg-slate-950 border border-orange-200">
+      <div class="w-40 sm:w-44 h-20 sm:h-24 mx-auto mb-3 rounded-2xl bg-black border border-orange-200/80 flex items-center justify-center overflow-hidden shadow-sm px-2">
+        <img src="logo-megamath.png" alt="Logo Mega Math" class="w-full h-full object-contain mix-blend-lighten">
       </div>
-      <h1 class="text-2xl font-extrabold text-slate-800">Panel Admin Bimbel</h1>
-      <p class="text-sm text-slate-500 mt-1">Mega Math - Bimbel Private</p>
+      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800">Panel Admin Bimbel</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">Mega Math - Bimbel Private</p>
     </div>
 
     <form id="form-login-admin" class="space-y-4">
       <div>
         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">ID Admin</label>
         <input type="text" id="admin-id-input" required placeholder="Contoh: ADMIN01"
-          class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
+          class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 focus:outline-none focus:border-orange-400 focus:bg-white text-sm font-bold text-slate-800">
       </div>
       <div>
         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password Admin</label>
         <input type="password" id="admin-pass-input" required placeholder="Masukkan password"
-          class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 text-sm font-bold text-slate-800">
+          class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 focus:outline-none focus:border-orange-400 focus:bg-white text-sm font-bold text-slate-800">
       </div>
       <p id="admin-login-error" class="text-xs font-bold text-rose-500 hidden text-center"></p>
-      <button type="submit" class="w-full btn-orange text-white font-extrabold text-base py-3.5 rounded-2xl">
+      <button type="submit"
+        class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold text-sm sm:text-base py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition">
         Masuk Panel Admin 🚀
       </button>
     </form>
   </div>
 
   <!-- DASHBOARD ADMIN -->
-  <div id="view-dashboard-admin" class="w-full max-w-3xl hidden space-y-4 pb-10">
+  <div id="view-dashboard-admin" class="w-full max-w-3xl hidden space-y-3.5 sm:space-y-4 pb-10">
 
     <!-- HEADER & NAVIGASI 4 TAB -->
-    <div class="soft-card p-5 space-y-4">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <img src="favicon-megamath.jpg" alt="Mega Math" class="w-8 h-8 rounded-xl object-cover border border-orange-200 shrink-0">
-          <h2 class="text-xl font-extrabold text-slate-800">Panel Admin Bimbel</h2>
-          <p class="text-xs font-bold text-slate-500 mt-0.5">
-            Login sebagai: <span id="admin-session-info" class="text-orange-600 font-extrabold">-</span>
-            • Periode: <span id="header-periode" class="text-slate-800 font-extrabold">-</span>
-          </p>
+    <div class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-5 space-y-4">
+      <div class="flex items-start justify-between gap-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-10 h-10 rounded-2xl bg-black border border-orange-200 flex items-center justify-center overflow-hidden shrink-0">
+            <img src="logo-megamath.png" alt="Mega Math" class="w-full h-full object-contain mix-blend-lighten px-0.5">
+          </div>
+          <div class="min-w-0">
+            <h2 class="text-base sm:text-xl font-extrabold text-slate-800 truncate">Panel Admin Bimbel</h2>
+            <p class="text-[11px] sm:text-xs font-bold text-slate-500 mt-0.5 truncate">
+              Login sebagai: <span id="admin-session-info" class="text-orange-600 font-extrabold">-</span>
+              • Periode: <span id="header-periode" class="text-slate-800 font-extrabold">-</span>
+            </p>
+          </div>
         </div>
         <button type="button" id="btn-logout-admin"
-          class="text-xs font-extrabold px-4 py-2 rounded-xl border border-orange-200 text-orange-600 bg-white hover:bg-orange-50 shrink-0">
+          class="text-xs font-extrabold px-3.5 py-2 rounded-xl border border-orange-200 text-orange-600 bg-white hover:bg-orange-50 shrink-0 transition">
           Keluar
         </button>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <button type="button" data-tab="aktivasi" id="tab-btn-aktivasi"
-          class="tab-active py-2.5 px-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5">
+          class="bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md shadow-orange-500/25 py-2.5 px-2.5 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition">
           <span>+</span><span>Aktivasi</span>
         </button>
         <button type="button" data-tab="tagihan" id="tab-btn-tagihan"
-          class="tab-idle py-2.5 px-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5">
+          class="bg-white text-slate-600 border-[1.5px] border-orange-300/80 hover:bg-orange-50/50 py-2.5 px-2.5 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition">
           <span>💳</span><span>Siswa &amp; Tagihan</span>
         </button>
         <button type="button" data-tab="riwayat" id="tab-btn-riwayat"
-          class="tab-idle py-2.5 px-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5">
+          class="bg-white text-slate-600 border-[1.5px] border-orange-300/80 hover:bg-orange-50/50 py-2.5 px-2.5 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition">
           <span>🕒</span><span>Riwayat Hadir</span>
         </button>
         <button type="button" data-tab="wa-admin" id="tab-btn-wa-admin"
-          class="tab-idle py-2.5 px-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5">
+          class="bg-white text-slate-600 border-[1.5px] border-orange-300/80 hover:bg-orange-50/50 py-2.5 px-2.5 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition">
           <span>⚙️</span><span>WA &amp; Admin</span>
         </button>
       </div>
     </div>
 
     <!-- HALAMAN 1: AKTIVASI SISWA BARU -->
-    <section id="page-aktivasi" class="soft-card p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-orange-100 pb-3">
-        <h3 class="text-sm font-extrabold uppercase tracking-wide text-orange-600 flex items-center gap-1.5">
+    <section id="page-aktivasi" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between gap-2 border-b border-orange-100 pb-3">
+        <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-orange-600 flex items-center gap-1.5">
           <span>+</span><span>AKTIVASI SISWA BARU</span>
         </h3>
-        <button type="button" data-back-home class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100">
+        <button type="button" data-back-home
+          class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 shrink-0 transition">
           ← Kembali
         </button>
       </div>
@@ -205,26 +188,27 @@
           <input type="text" id="reg-nama-ortu" placeholder="Nama Orang Tua"
             class="w-full px-4 py-3 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
 
-          <div class="flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden">
-            <span class="px-3 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200">+62</span>
+          <div class="flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden focus-within:border-orange-400">
+            <span class="px-3 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200 shrink-0">+62</span>
             <input type="text" id="reg-wa-ortu" inputmode="numeric" required placeholder="81234567890 (tanpa 0)"
-              class="w-full px-3 py-3 font-bold text-slate-800 focus:outline-none">
+              class="w-full min-w-0 px-3 py-3 font-bold text-slate-800 focus:outline-none">
           </div>
 
-          <div class="flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden">
-            <span class="px-3 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200">Rp</span>
+          <div class="flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden focus-within:border-orange-400">
+            <span class="px-3 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200 shrink-0">Rp</span>
             <input type="number" id="reg-biaya" inputmode="numeric" min="1000" max="5000000" step="1000" required placeholder="100000"
-              class="w-full px-3 py-3 font-bold text-slate-800 focus:outline-none">
+              class="w-full min-w-0 px-3 py-3 font-bold text-slate-800 focus:outline-none">
           </div>
         </div>
 
-        <div class="flex items-center justify-between text-[11px] text-slate-500 font-semibold px-1">
-          <span>Nominal dibatasi kelipatan ribuan (Rp1.000 – Rp5.000.000)</span>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-500 font-semibold px-1">
+          <span>Nominal kelipatan ribuan (Rp1.000 – Rp5.000.000)</span>
           <span>Preview: <strong id="reg-biaya-preview" class="text-orange-600">Rp0</strong> / pertemuan</span>
         </div>
         <p id="reg-error" class="text-xs font-bold text-rose-500 hidden"></p>
 
-        <button type="submit" class="w-full btn-orange text-white font-extrabold text-sm py-3.5 rounded-2xl mt-1">
+        <button type="submit"
+          class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold text-xs sm:text-sm py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition">
           Buat No. Registrasi &amp; Aktifkan Siswa
         </button>
       </form>
@@ -238,26 +222,26 @@
           <div>Biaya / Pertemuan: <span id="res-biaya" class="font-extrabold">-</span></div>
         </div>
         <a id="btn-kirim-wa-ortu" href="#" target="_blank" rel="noopener noreferrer"
-          class="block text-center w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold">
+          class="block text-center w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold transition">
           📲 Kirim Info Akun ke WA Orang Tua
         </a>
       </div>
     </section>
 
     <!-- HALAMAN 2: DAFTAR SISWA & TAGIHAN -->
-    <section id="page-tagihan" class="soft-card p-6 space-y-4 hidden">
+    <section id="page-tagihan" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-4 hidden">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-orange-100 pb-3">
-        <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+        <h3 class="text-xs sm:text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
           <span>💳</span>
           <span>Daftar Siswa &amp; Tagihan (<span id="label-bulan-tagihan">-</span>)</span>
         </h3>
         <div class="flex items-center gap-2">
           <button type="button" id="btn-refresh-tagihan"
-            class="text-xs font-extrabold text-orange-600 hover:text-orange-700 px-2.5 py-1.5 rounded-xl bg-orange-50">
+            class="text-xs font-extrabold text-orange-600 hover:text-orange-700 px-2.5 py-1.5 rounded-xl bg-orange-50 transition">
             Refresh
           </button>
           <button type="button" data-back-home
-            class="text-xs font-extrabold px-3 py-1.5 rounded-xl border border-orange-200 text-slate-600 bg-white">
+            class="text-xs font-extrabold px-3 py-1.5 rounded-xl border border-orange-200 text-slate-600 bg-white hover:bg-orange-50 transition">
             ← Kembali
           </button>
         </div>
@@ -269,22 +253,22 @@
     </section>
 
     <!-- HALAMAN 3: RIWAYAT PRESENSI SISWA -->
-    <section id="page-riwayat" class="soft-card p-6 space-y-4 hidden">
+    <section id="page-riwayat" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-4 hidden">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-orange-100 pb-3">
-        <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+        <h3 class="text-xs sm:text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
           <span>🕒</span>
           <span>Riwayat Presensi Siswa</span>
         </h3>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           <select id="admin-filter-bulan"
-            class="text-xs font-extrabold bg-white border border-orange-200 text-orange-600 rounded-xl px-3 py-1.5 focus:outline-none">
+            class="text-xs font-extrabold bg-white border border-orange-200 text-orange-600 rounded-xl px-2.5 py-1.5 focus:outline-none">
           </select>
           <button type="button" id="btn-refresh-riwayat"
             class="text-xs font-extrabold text-orange-600 hover:text-orange-700 px-2 py-1.5">
             Refresh
           </button>
           <button type="button" data-back-home
-            class="text-xs font-extrabold px-3 py-1.5 rounded-xl border border-orange-200 text-slate-600 bg-white">
+            class="text-xs font-extrabold px-3 py-1.5 rounded-xl border border-orange-200 text-slate-600 bg-white hover:bg-orange-50 transition">
             ← Kembali
           </button>
         </div>
@@ -296,14 +280,14 @@
     </section>
 
     <!-- HALAMAN 4: WA & ADMIN -->
-    <section id="page-wa-admin" class="soft-card p-6 space-y-6 hidden">
-      <div class="flex items-center justify-between border-b border-orange-100 pb-3">
-        <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+    <section id="page-wa-admin" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-5 sm:space-y-6 hidden">
+      <div class="flex items-center justify-between gap-2 border-b border-orange-100 pb-3">
+        <h3 class="text-xs sm:text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
           <span>⚙️</span>
           <span>Pengaturan WA &amp; Akun Admin</span>
         </h3>
         <button type="button" data-back-home
-          class="text-xs font-extrabold px-3 py-1.5 rounded-xl border border-orange-200 text-slate-600 bg-white">
+          class="text-xs font-extrabold px-3 py-1.5 rounded-xl border border-orange-200 text-slate-600 bg-white hover:bg-orange-50 shrink-0 transition">
           ← Kembali
         </button>
       </div>
@@ -314,12 +298,13 @@
           📲 NOMOR WA ADMIN DINAMIS
         </label>
         <div class="flex flex-col sm:flex-row gap-2.5">
-          <div class="flex-1 flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden">
-            <span class="px-3.5 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200">+62</span>
+          <div class="flex-1 flex items-center rounded-2xl border border-orange-200 bg-white overflow-hidden focus-within:border-orange-400">
+            <span class="px-3.5 py-3 bg-orange-50 text-orange-700 font-extrabold border-r border-orange-200 shrink-0">+62</span>
             <input type="text" id="set-admin-wa-local" inputmode="numeric" required placeholder="89611914296"
-              class="w-full px-3.5 py-3 font-extrabold text-slate-800 focus:outline-none">
+              class="w-full min-w-0 px-3.5 py-3 font-extrabold text-slate-800 focus:outline-none">
           </div>
-          <button type="submit" class="btn-orange text-white font-extrabold px-5 py-3 rounded-2xl shrink-0">
+          <button type="submit"
+            class="w-full sm:w-auto bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold px-5 py-3 rounded-2xl shadow-md shadow-orange-500/25 shrink-0 transition">
             Simpan WA Admin
           </button>
         </div>
@@ -334,21 +319,22 @@
         <form id="form-simpan-admin" class="space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <input type="text" id="adm-id-field" required placeholder="ID ADMIN (MISAL: ADMIN02)"
-              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 uppercase">
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 uppercase focus:outline-none focus:border-orange-400">
             <input type="text" id="adm-nama-field" required placeholder="Nama Admin (misal: Kak Rina)"
-              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800">
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
             <input type="password" id="adm-pass-field" minlength="4" placeholder="Password (min. 4)"
-              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800">
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
           </div>
 
-          <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <select id="adm-status-field"
-              class="px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-extrabold text-slate-800">
+              class="w-full sm:w-auto px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-extrabold text-slate-800 focus:outline-none focus:border-orange-400">
               <option value="true">AKTIF</option>
               <option value="false">NONAKTIF</option>
             </select>
 
-            <button type="submit" class="btn-orange text-white font-extrabold px-5 py-2.5 rounded-2xl">
+            <button type="submit"
+              class="w-full sm:w-auto bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold px-5 py-2.5 rounded-2xl shadow-md shadow-orange-500/25 transition">
               Simpan Akun Admin
             </button>
           </div>
@@ -393,6 +379,9 @@
         adminWa: "6289611914296",
         biayaDefault: 120000
       };
+
+      var TAB_ACTIVE_CLS = "bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md shadow-orange-500/25 py-2.5 px-2.5 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition";
+      var TAB_IDLE_CLS = "bg-white text-slate-600 border-[1.5px] border-orange-300/80 hover:bg-orange-50/50 py-2.5 px-2.5 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition";
 
       function pad2(n) {
         return n < 10 ? "0" + n : String(n);
@@ -521,9 +510,7 @@
             }
           }
           if (btnEl) {
-            btnEl.className = (t === activeTab)
-              ? "tab-active py-2.5 px-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5"
-              : "tab-idle py-2.5 px-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5";
+            btnEl.className = (t === activeTab) ? TAB_ACTIVE_CLS : TAB_IDLE_CLS;
           }
         }
 
@@ -611,10 +598,11 @@
               row.className = "p-3.5 rounded-2xl bg-white border border-orange-200 flex items-center justify-between gap-2";
 
               var info = document.createElement("div");
+              info.className = "min-w-0 truncate";
               info.innerHTML = '<span class="font-extrabold text-slate-800">' + admNama + '</span> <span class="text-slate-500 font-bold">(' + admId + ')</span>';
 
               var right = document.createElement("div");
-              right.className = "flex items-center gap-2";
+              right.className = "flex items-center gap-2 shrink-0";
 
               var badge = document.createElement("span");
               badge.className = isAktif
@@ -965,10 +953,10 @@
             for (var i = 0; i < list.length; i++) {
               (function(item) {
                 var card = document.createElement("div");
-                card.className = "p-4 rounded-2xl bg-white border border-orange-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+                card.className = "p-3.5 sm:p-4 rounded-2xl bg-white border border-orange-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3";
 
                 var left = document.createElement("div");
-                left.className = "space-y-1";
+                left.className = "space-y-1 min-w-0";
 
                 var head = document.createElement("div");
                 head.className = "flex items-center gap-2 flex-wrap";
@@ -1023,11 +1011,11 @@
                 }
 
                 var actions = document.createElement("div");
-                actions.className = "flex items-center gap-2 shrink-0";
+                actions.className = "flex items-center gap-2 flex-wrap shrink-0";
 
                 var btnReset = document.createElement("button");
                 btnReset.type = "button";
-                btnReset.className = "text-xs font-extrabold px-3 py-2 rounded-xl border border-orange-200 text-slate-700 bg-white hover:bg-orange-50";
+                btnReset.className = "text-xs font-extrabold px-3 py-2 rounded-xl border border-orange-200 text-slate-700 bg-white hover:bg-orange-50 transition";
                 btnReset.textContent = "Reset Pass";
                 btnReset.addEventListener("click", function() {
                   resetPasswordSiswa(item);
@@ -1037,7 +1025,7 @@
                 if (item.hasPaidSessions) {
                   var btnBatal = document.createElement("button");
                   btnBatal.type = "button";
-                  btnBatal.className = "text-xs font-extrabold px-3 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200";
+                  btnBatal.className = "text-xs font-extrabold px-3 py-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition";
                   btnBatal.textContent = "Batalkan Lunas";
                   btnBatal.addEventListener("click", function() {
                     batalkanLunas(item);
@@ -1048,7 +1036,7 @@
                 if (!item.isLunas) {
                   var btnTandai = document.createElement("button");
                   btnTandai.type = "button";
-                  btnTandai.className = "text-xs font-extrabold px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white";
+                  btnTandai.className = "text-xs font-extrabold px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition";
                   btnTandai.textContent = "Tandai LUNAS";
                   btnTandai.addEventListener("click", function() {
                     openLunasModal(item);
@@ -1135,10 +1123,10 @@
             for (var i = 0; i < rows.length; i++) {
               (function(r) {
                 var card = document.createElement("div");
-                card.className = "p-4 rounded-2xl bg-white border border-orange-100 flex items-center justify-between gap-3";
+                card.className = "p-3.5 sm:p-4 rounded-2xl bg-white border border-orange-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3";
 
                 var left = document.createElement("div");
-                left.className = "space-y-1";
+                left.className = "space-y-1 min-w-0";
 
                 var title = document.createElement("div");
                 title.className = "font-extrabold text-sm text-slate-800";
@@ -1155,7 +1143,7 @@
                 var btnWa = document.createElement("a");
                 btnWa.target = "_blank";
                 btnWa.rel = "noopener noreferrer";
-                btnWa.className = "px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shrink-0";
+                btnWa.className = "px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs text-center shrink-0 transition";
                 btnWa.textContent = "💬 WA Ortu";
 
                 var msg = encodeURIComponent(
