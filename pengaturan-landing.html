@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#FB923C">
   <link rel="icon" type="image/png" href="favicon-megamath.png">
   <link rel="apple-touch-icon" href="favicon-megamath.png">
@@ -106,9 +106,9 @@
           class="text-xs font-extrabold px-3.5 py-2 rounded-xl border border-orange-200 text-slate-700 bg-white hover:bg-orange-50 transition">
           ← Panel Admin
         </a>
-        <button type="button" id="btn-kunci-akses"
+        <button type="button" id="btn-keluar-akses"
           class="text-xs font-extrabold px-3 py-2 rounded-xl border border-rose-200 text-rose-600 bg-rose-50/70 hover:bg-rose-100 transition">
-          Kunci
+          Keluar
         </button>
       </div>
     </div>
@@ -248,137 +248,151 @@
         modal.classList.remove("flex");
       }
 
+      function showAdminGate(errorMsg) {
+        document.getElementById("admin-content").classList.add("hidden");
+        document.getElementById("admin-gate").classList.remove("hidden");
+        document.getElementById("admin-gate").classList.add("flex");
+        var errEl = document.getElementById("gate-error");
+        if (errorMsg) {
+          errEl.textContent = errorMsg;
+          errEl.classList.remove("hidden");
+        } else {
+          errEl.textContent = "";
+          errEl.classList.add("hidden");
+        }
+      }
+
       function readAdminSession() {
-  try {
-    var raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    var parsed = JSON.parse(raw);
-    if (!parsed || !parsed.id) return null;
-    return {
-      id: String(parsed.id).trim().toUpperCase(),
-      nama: String(parsed.nama || parsed.id).trim()
-    };
-  } catch (e) {
-    return null;
-  }
-}
-
-function writeAdminSession(adminObj) {
-  try {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({
-      id: String(adminObj.id || "").trim().toUpperCase(),
-      nama: String(adminObj.nama || adminObj.id || "").trim(),
-      loginAt: Date.now()
-    }));
-  } catch (e) {}
-}
-
-function clearAdminSession() {
-  try {
-    localStorage.removeItem(SESSION_KEY);
-  } catch (e) {}
-}
-
-function unlockAdminView(adminInfo) {
-  document.getElementById("admin-gate").classList.add("hidden");
-  document.getElementById("admin-gate").classList.remove("flex");
-  document.getElementById("admin-content").classList.remove("hidden");
-
-  document.getElementById("active-admin-badge").textContent =
-    adminInfo.id + " • " + (adminInfo.nama || adminInfo.id);
-
-  if (!hasLoadedSetting) {
-    hasLoadedSetting = true;
-    loadLandingSetting();
-  }
-}
-
-function verifyStoredSession() {
-  var session = readAdminSession();
-  if (!session) {
-    hasLoadedSetting = false;
-    showAdminGate("Belum ada sesi login admin. Silakan login terlebih dahulu.");
-    return;
-  }
-
-  // Langsung buka tampilan jika sesi lokal sudah ada, lalu cek status akun di Firestore
-  unlockAdminView(session);
-
-  db.collection("admin").doc(session.id).get()
-    .then(function(doc) {
-      if (!doc.exists) {
-        clearAdminSession();
-        hasLoadedSetting = false;
-        showAdminGate("Akun admin '" + session.id + "' tidak ditemukan.");
-        return;
-      }
-      var a = doc.data() || {};
-      if (a.aktif === false) {
-        clearAdminSession();
-        hasLoadedSetting = false;
-        showAdminGate("Akun admin '" + session.id + "' sedang nonaktif.");
-        return;
-      }
-      var freshInfo = {
-        id: String(a.id || doc.id).trim().toUpperCase(),
-        nama: String(a.nama || session.nama || doc.id).trim()
-      };
-      writeAdminSession(freshInfo);
-      unlockAdminView(freshInfo);
-    })
-    .catch(function() {
-      // Tetap pertahankan sesi jika gagal koneksi sementara
-    });
-}
-
-function handleGateLogin(event) {
-  event.preventDefault();
-  var adminId = String(document.getElementById("gate-admin-id").value || "").trim().toUpperCase();
-  var pass = String(document.getElementById("gate-admin-pass").value || "");
-  var errEl = document.getElementById("gate-error");
-  errEl.classList.add("hidden");
-
-  if (!adminId || !pass) {
-    errEl.textContent = "ID Admin dan password wajib diisi.";
-    errEl.classList.remove("hidden");
-    return;
-  }
-
-  setLoading(true, "Mengecek kredensial admin...");
-  db.collection("admin").doc(adminId).get()
-    .then(function(doc) {
-      setLoading(false);
-      if (!doc.exists) {
-        errEl.textContent = "ID Admin tidak ditemukan.";
-        errEl.classList.remove("hidden");
-        return;
-      }
-      var a = doc.data() || {};
-      if (a.aktif === false) {
-        errEl.textContent = "Akun admin sedang nonaktif.";
-        errEl.classList.remove("hidden");
-        return;
-      }
-      if (String(a.password || "") !== pass) {
-        errEl.textContent = "Password admin salah.";
-        errEl.classList.remove("hidden");
-        return;
+        try {
+          var raw = localStorage.getItem(SESSION_KEY);
+          if (!raw) return null;
+          var parsed = JSON.parse(raw);
+          if (!parsed || !parsed.id) return null;
+          return {
+            id: String(parsed.id).trim().toUpperCase(),
+            nama: String(parsed.nama || parsed.id).trim()
+          };
+        } catch (e) {
+          return null;
+        }
       }
 
-      var info = {
-        id: String(a.id || doc.id).trim().toUpperCase(),
-        nama: String(a.nama || doc.id).trim()
-      };
-      writeAdminSession(info);
-      document.getElementById("gate-admin-pass").value = "";
-      unlockAdminView(info);
-    })
-    .catch(function() {
-      setLoading(false);
-      errEl.textContent = "Gagal menghubungi Firestore.";
-      errEl.classList.remove("hidden");
-    });
-}
+      function writeAdminSession(adminObj) {
+        try {
+          localStorage.setItem(SESSION_KEY, JSON.stringify({
+            id: String(adminObj.id || "").trim().toUpperCase(),
+            nama: String(adminObj.nama || adminObj.id || "").trim(),
+            loginAt: Date.now()
+          }));
+        } catch (e) {}
+      }
+
+      function clearAdminSession() {
+        try {
+          localStorage.removeItem(SESSION_KEY);
+          sessionStorage.removeItem(SESSION_KEY);
+        } catch (e) {}
+      }
+
+      function unlockAdminView(adminInfo) {
+        document.getElementById("admin-gate").classList.add("hidden");
+        document.getElementById("admin-gate").classList.remove("flex");
+        document.getElementById("admin-content").classList.remove("hidden");
+
+        document.getElementById("active-admin-badge").textContent =
+          adminInfo.id + " • " + (adminInfo.nama || adminInfo.id);
+
+        if (!hasLoadedSetting) {
+          hasLoadedSetting = true;
+          loadLandingSetting();
+        }
+      }
+
+      function verifyStoredSession() {
+        var session = readAdminSession();
+        if (!session) {
+          hasLoadedSetting = false;
+          showAdminGate("Belum ada sesi login admin. Silakan login terlebih dahulu.");
+          return;
+        }
+
+        unlockAdminView(session);
+
+        db.collection("admin").doc(session.id).get()
+          .then(function(doc) {
+            if (!doc.exists) {
+              clearAdminSession();
+              hasLoadedSetting = false;
+              showAdminGate("Akun admin '" + session.id + "' tidak ditemukan.");
+              return;
+            }
+            var a = doc.data() || {};
+            if (a.aktif === false) {
+              clearAdminSession();
+              hasLoadedSetting = false;
+              showAdminGate("Akun admin '" + session.id + "' sedang nonaktif.");
+              return;
+            }
+            var freshInfo = {
+              id: String(a.id || doc.id).trim().toUpperCase(),
+              nama: String(a.nama || session.nama || doc.id).trim()
+            };
+            writeAdminSession(freshInfo);
+            unlockAdminView(freshInfo);
+          })
+          .catch(function() {
+            // Tetap pertahankan sesi jika gagal koneksi sementara
+          });
+      }
+
+      function handleGateLogin(event) {
+        event.preventDefault();
+        var adminId = String(document.getElementById("gate-admin-id").value || "").trim().toUpperCase();
+        var pass = String(document.getElementById("gate-admin-pass").value || "");
+        var errEl = document.getElementById("gate-error");
+        errEl.classList.add("hidden");
+
+        if (!adminId || !pass) {
+          errEl.textContent = "ID Admin dan password wajib diisi.";
+          errEl.classList.remove("hidden");
+          return;
+        }
+
+        setLoading(true, "Mengecek kredensial admin...");
+        db.collection("admin").doc(adminId).get()
+          .then(function(doc) {
+            setLoading(false);
+            if (!doc.exists) {
+              errEl.textContent = "ID Admin tidak ditemukan.";
+              errEl.classList.remove("hidden");
+              return;
+            }
+            var a = doc.data() || {};
+            if (a.aktif === false) {
+              errEl.textContent = "Akun admin sedang nonaktif.";
+              errEl.classList.remove("hidden");
+              return;
+            }
+            if (String(a.password || "") !== pass) {
+              errEl.textContent = "Password admin salah.";
+              errEl.classList.remove("hidden");
+              return;
+            }
+
+            var info = {
+              id: String(a.id || doc.id).trim().toUpperCase(),
+              nama: String(a.nama || doc.id).trim()
+            };
+            writeAdminSession(info);
+            document.getElementById("gate-admin-pass").value = "";
+            unlockAdminView(info);
+          })
+          .catch(function() {
+            setLoading(false);
+            errEl.textContent = "Gagal menghubungi Firestore.";
+            errEl.classList.remove("hidden");
+          });
+      }
 
       function syncItemsFromDom() {
         var rows = document.querySelectorAll("[data-paket-row]");
@@ -501,7 +515,7 @@ function handleGateLogin(event) {
 
       function handleSaveLanding(event) {
         event.preventDefault();
-        if (!sessionStorage.getItem(SESSION_KEY)) {
+        if (!readAdminSession()) {
           showAdminGate("Sesi admin berakhir. Silakan login ulang sebelum menyimpan.");
           return;
         }
@@ -534,9 +548,9 @@ function handleGateLogin(event) {
             setLoading(false);
             showNotif("🌐", "Tersimpan", "Pengaturan landing page dan daftar paket berhasil diperbarui.");
           })
-          .catch(function() {
+          .catch(function(err) {
             setLoading(false);
-            errEl.textContent = "Gagal menyimpan pengaturan. Periksa koneksi atau aturan Firestore.";
+            errEl.textContent = "Gagal menyimpan pengaturan: " + (err && err.message ? err.message : "periksa koneksi atau aturan Firestore.");
             errEl.classList.remove("hidden");
           });
       }
@@ -544,10 +558,10 @@ function handleGateLogin(event) {
       document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("btn-tutup-notif").addEventListener("click", closeNotif);
         document.getElementById("form-gate-login").addEventListener("submit", handleGateLogin);
-        document.getElementById("btn-kunci-akses").addEventListener("click", function() {
-          sessionStorage.removeItem(SESSION_KEY);
+        document.getElementById("btn-keluar-akses").addEventListener("click", function() {
+          clearAdminSession();
           hasLoadedSetting = false;
-          showAdminGate("Akses dikunci. Silakan masuk kembali untuk mengedit.");
+          window.location.href = "index.html";
         });
         document.getElementById("btn-tambah-paket").addEventListener("click", function() {
           syncItemsFromDom();
@@ -567,14 +581,13 @@ function handleGateLogin(event) {
 
         verifyStoredSession();
       });
-      // Kalau login/logout terjadi di tab lain (misalnya admin.html), langsung sinkron
+
       window.addEventListener("storage", function(e) {
         if (e.key === SESSION_KEY) {
           verifyStoredSession();
         }
       });
-      
-      // Cek ulang saat halaman kembali aktif / di-restore dari bfcache
+
       window.addEventListener("pageshow", function() {
         verifyStoredSession();
       });
