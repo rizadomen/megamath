@@ -430,6 +430,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script>
+    var ADMIN_SESSION_KEY = "bimbel_admin_session";
     (function() {
       var firebaseConfig = {
         apiKey: "AIzaSyDmBlSBdeVPRO-AeUPQPEpDJzOLVE6fLUE",
@@ -1441,21 +1442,32 @@
             setLoading(false);
           });
       }
-
+      function getSavedAdminSession() {
+        try {
+          var raw = localStorage.getItem(ADMIN_SESSION_KEY) || sessionStorage.getItem(ADMIN_SESSION_KEY);
+          if (!raw) return null;
+          var obj = JSON.parse(raw);
+          if (!obj || !obj.id) return null;
+          return {
+            id: String(obj.id).trim().toUpperCase(),
+            nama: String(obj.nama || obj.id).trim()
+          };
+        } catch (e) {
+          return null;
+        }
+      }
       function enterAdminDashboard(adminObj) {
-        currentAdmin = adminObj;
-        var cleanSession = {
+        currentAdmin = {
           id: String(adminObj && adminObj.id ? adminObj.id : "").trim().toUpperCase(),
-          nama: String(adminObj && adminObj.nama ? adminObj.nama : "").trim(),
-          loginAt: Date.now()
+          nama: String(adminObj && adminObj.nama ? adminObj.nama : "").trim()
         };
       
         try {
-          localStorage.setItem("bimbel_admin_session", JSON.stringify(cleanSession));
-          sessionStorage.setItem("bimbel_admin_session", JSON.stringify(cleanSession));
+          localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdmin));
+          sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdmin));
         } catch (e) {}
       
-        document.getElementById("admin-session-info").textContent = cleanSession.id + " • " + cleanSession.nama;
+        document.getElementById("admin-session-info").textContent = currentAdmin.id + " • " + currentAdmin.nama;
         document.getElementById("header-periode").textContent = getCurrentMonthStr();
         populateMonthSelect();
       
@@ -1508,11 +1520,30 @@
       function handleLogoutAdmin() {
         currentAdmin = null;
         try {
-          sessionStorage.removeItem("bimbel_admin_session");
+          localStorage.removeItem(ADMIN_SESSION_KEY);
+          sessionStorage.removeItem(ADMIN_SESSION_KEY);
         } catch (e) {}
         document.getElementById("view-dashboard-admin").classList.add("hidden");
         document.getElementById("view-login-admin").classList.remove("hidden");
         document.getElementById("admin-pass-input").value = "";
+      }
+
+      function syncAdminSessionState() {
+        var saved = getSavedAdminSession();
+        var dashEl = document.getElementById("view-dashboard-admin");
+        var loginEl = document.getElementById("view-login-admin");
+
+        if (saved) {
+          if (!currentAdmin || currentAdmin.id !== saved.id || (dashEl && dashEl.classList.contains("hidden"))) {
+            enterAdminDashboard(saved);
+          }
+        } else {
+          if (currentAdmin || (dashEl && !dashEl.classList.contains("hidden"))) {
+            handleLogoutAdmin();
+          } else if (loginEl) {
+            loginEl.classList.remove("hidden");
+          }
+        }
       }
 
       document.addEventListener("DOMContentLoaded", function() {
@@ -1560,17 +1591,24 @@
         document.getElementById("btn-toggle-akses-siswa").addEventListener("click", handleToggleAksesSiswa);
         document.getElementById("form-hapus-permanen").addEventListener("submit", handleHapusPermanenSiswa);
 
-        try {
-          var saved = sessionStorage.getItem("bimbel_admin_session");
-          if (saved) {
-            var parsed = JSON.parse(saved);
-            if (parsed && parsed.id) {
-              enterAdminDashboard(parsed);
-            }
+       syncAdminSessionState();
+
+        window.addEventListener("storage", function(e) {
+          if (e.key === ADMIN_SESSION_KEY) {
+            syncAdminSessionState();
           }
-        } catch (e) {}
+        });
+
+        window.addEventListener("pageshow", function() {
+          syncAdminSessionState();
+        });
+
+        document.addEventListener("visibilitychange", function() {
+          if (!document.hidden) {
+            syncAdminSessionState();
+          }
+        });
       });
-    })();
   </script>
 </body>
 </html>
