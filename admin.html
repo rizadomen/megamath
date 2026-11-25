@@ -1444,17 +1444,24 @@
 
       function enterAdminDashboard(adminObj) {
         currentAdmin = adminObj;
+        var cleanSession = {
+          id: String(adminObj && adminObj.id ? adminObj.id : "").trim().toUpperCase(),
+          nama: String(adminObj && adminObj.nama ? adminObj.nama : "").trim(),
+          loginAt: Date.now()
+        };
+      
         try {
-          sessionStorage.setItem("bimbel_admin_session", JSON.stringify(adminObj));
+          localStorage.setItem("bimbel_admin_session", JSON.stringify(cleanSession));
+          sessionStorage.setItem("bimbel_admin_session", JSON.stringify(cleanSession));
         } catch (e) {}
-
-        document.getElementById("admin-session-info").textContent = adminObj.id + " • " + adminObj.nama;
+      
+        document.getElementById("admin-session-info").textContent = cleanSession.id + " • " + cleanSession.nama;
         document.getElementById("header-periode").textContent = getCurrentMonthStr();
         populateMonthSelect();
-
+      
         document.getElementById("view-login-admin").classList.add("hidden");
         document.getElementById("view-dashboard-admin").classList.remove("hidden");
-
+      
         loadPengaturan();
         switchTab(activeTab || "aktivasi");
       }
