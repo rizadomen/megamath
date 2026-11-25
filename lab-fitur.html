@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#FB923C">
+  <link rel="icon" type="image/png" href="favicon-megamath.png">
+  <link rel="apple-touch-icon" href="favicon-megamath.png">
+  <title>Lab Fitur Tambahan - Mega Math</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#FFFDF9] text-slate-800 px-3 py-4 sm:p-6">
+
+  <!-- LOADER -->
+  <div id="loader" class="fixed inset-0 bg-[#FFFDF9]/85 backdrop-blur-sm z-50 hidden flex-col items-center justify-center px-4">
+    <div class="w-11 h-11 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+    <p id="loader-text" class="mt-3 text-xs sm:text-sm font-bold text-orange-600">Memproses eksperimen...</p>
+  </div>
+
+  <!-- MODAL NOTIFIKASI -->
+  <div id="modal-notif" class="fixed inset-0 bg-slate-900/45 z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-sm bg-white border-[1.5px] border-orange-200 shadow-xl rounded-3xl p-5 sm:p-6 text-center space-y-4">
+      <div id="notif-icon" class="text-4xl">🧪</div>
+      <h3 id="notif-title" class="text-base sm:text-lg font-extrabold text-slate-800">Informasi</h3>
+      <p id="notif-message" class="text-xs text-slate-600 leading-relaxed font-semibold">-</p>
+      <button type="button" id="btn-tutup-notif"
+        class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white font-extrabold text-sm py-3 rounded-2xl shadow-md shadow-orange-500/25 transition">
+        Oke, Mengerti
+      </button>
+    </div>
+  </div>
+
+  <!-- KONTAINER UTAMA -->
+  <div class="max-w-3xl mx-auto space-y-4 pb-12">
+
+    <!-- HEADER LAB -->
+    <div class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <img src="favicon-megamath.png" alt="Mega Math" class="w-11 h-9 object-contain mix-blend-multiply shrink-0">
+        <div class="min-w-0">
+          <div class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 mb-0.5">
+            <span>🧪 Mode Uji Coba Terpisah</span>
+          </div>
+          <h1 class="text-base sm:text-xl font-extrabold text-slate-800 truncate">Lab Fitur Tambahan</h1>
+          <p id="lab-session-info" class="text-[11px] sm:text-xs font-bold text-slate-500 truncate">
+            Memeriksa sesi...
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="admin.html"
+          class="text-xs font-extrabold px-3.5 py-2 rounded-xl border border-orange-200 text-orange-600 bg-white hover:bg-orange-50 transition">
+          ← Panel Admin
+        </a>
+      </div>
+    </div>
+
+    <!-- BANNER KEAMANAN ISOLASI DATA -->
+    <div class="p-3.5 sm:p-4 rounded-2xl bg-orange-50/80 border border-orange-200/80 text-xs text-slate-700 font-semibold flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <span>
+        Aman untuk eksperimen: data uji coba disimpan ke koleksi terpisah (<strong class="text-orange-700">lab_catatan</strong> &amp; <strong class="text-orange-700">lab_kuis</strong>), tidak mengubah data <strong class="text-slate-800">presensi</strong>.
+      </span>
+      <span id="lab-mode-badge" class="text-[11px] font-extrabold px-2.5 py-1 rounded-lg bg-white border border-orange-200 text-orange-700 shrink-0 text-center">
+        Draft / Uji Coba
+      </span>
+    </div>
+
+    <!-- NAVIGASI MODUL EKSPERIMEN -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <button type="button" data-lab-tab="catatan" id="lab-tab-catatan"
+        class="bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md shadow-orange-500/25 py-2.5 px-3 rounded-2xl text-xs font-extrabold transition">
+        📝 Catatan &amp; PR Sesi
+      </button>
+      <button type="button" data-lab-tab="kuis" id="lab-tab-kuis"
+        class="bg-white text-slate-600 border-[1.5px] border-orange-300/80 hover:bg-orange-50/50 py-2.5 px-3 rounded-2xl text-xs font-extrabold transition">
+        🧮 Latihan Kuis Kilat
+      </button>
+      <button type="button" data-lab-tab="sandi" id="lab-tab-sandi"
+        class="bg-white text-slate-600 border-[1.5px] border-orange-300/80 hover:bg-orange-50/50 py-2.5 px-3 rounded-2xl text-xs font-extrabold transition">
+        🧩 Sandbox Modul Baru
+      </button>
+    </div>
+
+    <!-- MODUL 1: UJI COBA CATATAN MATERI & PR -->
+    <section id="lab-panel-catatan" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-4 text-xs">
+      <div class="border-b border-orange-100 pb-3">
+        <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-orange-600">
+          📝 UJI COBA CATATAN MATERI &amp; PR (KOLEKSI: lab_catatan)
+        </h2>
+        <p class="text-slate-500 font-semibold mt-0.5">
+          Pilih siswa dari daftar aktif lalu simpan catatan/PR percobaan tanpa mengubah presensi.
+        </p>
+      </div>
+
+      <form id="form-lab-catatan" class="space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Pilih Siswa</label>
+            <select id="lab-catatan-siswa" required
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
+              <option value="">Memuat daftar siswa...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Topik / Materi</label>
+            <input type="text" id="lab-catatan-topik" required placeholder="Contoh: Pecahan Senilai &amp; Pengurangan"
+              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Catatan PR / Latihan di Rumah</label>
+          <textarea id="lab-catatan-pr" rows="2" placeholder="Contoh: Kerjakan LKS halaman 14 nomor 1–5"
+            class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-semibold text-slate-800 focus:outline-none focus:border-orange-400"></textarea>
+        </div>
+
+        <button type="submit"
+          class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold text-xs sm:text-sm py-3 rounded-2xl shadow-md shadow-orange-500/25 transition">
+          Simpan Catatan Uji Coba
+        </button>
+      </form>
+
+      <div class="border-t border-orange-100 pt-4 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="font-extrabold text-slate-700">Hasil Catatan Tersimpan (lab_catatan)</span>
+          <button type="button" id="btn-refresh-catatan" class="font-extrabold text-orange-600 hover:underline">
+            Refresh
+          </button>
+        </div>
+        <div id="lab-list-catatan" class="space-y-2">
+          <p class="text-slate-400 text-center py-3">Belum ada data catatan uji coba.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODUL 2: UJI COBA KUIS KILAT INTERAKTIF -->
+    <section id="lab-panel-kuis" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-4 text-xs hidden">
+      <div class="border-b border-orange-100 pb-3 flex items-center justify-between gap-2">
+        <div>
+          <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-orange-600">
+            🧮 UJI COBA KUIS KILAT
+          </h2>
+          <p class="text-slate-500 font-semibold mt-0.5">
+            Prototipe latihan cepat untuk menguji alur soal, skor, dan penyimpanan hasil percobaan.
+          </p>
+        </div>
+        <button type="button" id="btn-acak-soal"
+          class="px-3 py-2 rounded-xl bg-orange-50 text-orange-600 border border-orange-200 font-extrabold shrink-0 hover:bg-orange-100 transition">
+          Soal Baru
+        </button>
+      </div>
+
+      <div id="kuis-box" class="p-4 rounded-2xl bg-orange-50/50 border border-orange-200 space-y-3">
+        <div class="flex items-center justify-between text-[11px] font-extrabold text-orange-700">
+          <span id="kuis-level">Jenjang: SD Dasar</span>
+          <span id="kuis-skor">Skor Percobaan: 0</span>
+        </div>
+        <p id="kuis-pertanyaan" class="text-sm sm:text-base font-extrabold text-slate-800">-</p>
+
+        <form id="form-kuis-jawab" class="flex flex-col sm:flex-row gap-2.5">
+          <input type="number" id="kuis-jawaban-input" required placeholder="Ketik jawaban angka..."
+            class="flex-1 px-4 py-2.5 rounded-2xl bg-white border border-orange-200 font-extrabold text-slate-800 focus:outline-none focus:border-orange-400">
+          <button type="submit"
+            class="bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white font-extrabold px-5 py-2.5 rounded-2xl shadow-md shadow-orange-500/25 transition">
+            Cek Jawaban
+          </button>
+        </form>
+
+        <p id="kuis-feedback" class="text-xs font-extrabold hidden"></p>
+      </div>
+    </section>
+
+    <!-- MODUL 3: SANDBOX MODUL BARU -->
+    <section id="lab-panel-sandi" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-3 text-xs hidden">
+      <div class="border-b border-orange-100 pb-3">
+        <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-orange-600">
+          🧩 SANDBOX MODUL BARU
+        </h2>
+        <p class="text-slate-500 font-semibold mt-0.5">
+          Area kosong siap pakai kalau kamu dan partner kepikiran ide fitur baru (misal: rekap jadwal rutin, target nilai, atau notifikasi) tanpa menyentuh file utama dulu.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-[#FFFDF9] border border-dashed border-orange-300 space-y-2">
+        <div class="font-extrabold text-slate-800">Alur Promosi Fitur ke Produksi:</div>
+        <ol class="list-decimal list-inside space-y-1 text-slate-600 font-semibold">
+          <li>Uji tampilan dan alur data di <code class="text-orange-700 font-bold">lab-fitur.html</code> sampai cocok dengan partner.</li>
+          <li>Pastikan nama *field* dan koleksi Firestore sudah final.</li>
+          <li>Pindahkan fungsi yang sudah matang ke <code class="text-orange-700 font-bold">admin.html</code> atau <code class="text-orange-700 font-bold">siswa.html</code>.</li>
+        </ol>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- FIREBASE COMPAT SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    (function() {
+      var firebaseConfig = {
+        apiKey: "AIzaSyDmBlSBdeVPRO-AeUPQPEpDJzOLVE6fLUE",
+        authDomain: "mega-math-bimbel.firebaseapp.com",
+        projectId: "mega-math-bimbel",
+        storageBucket: "mega-math-bimbel.firebasestorage.app",
+        messagingSenderId: "1018677380626",
+        appId: "1:1018677380626:web:0f37cc89072d1816b57acb",
+        measurementId: "G-X3JBT00B7L"
+      };
+
+      var ADMIN_SESSION_KEY = "bimbel_admin_session";
+
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.firestore();
+
+      var activeLabTab = "catatan";
+      var currentSoal = null;
+      var kuisSkor = 0;
+
+      var TAB_ACTIVE_CLS = "bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md shadow-orange-500/25 py-2.5 px-3 rounded-2xl text-xs font-extrabold transition";
+      var TAB_IDLE_CLS = "bg-white text-slate-600 border-[1.5px] border-orange-300/80 hover:bg-orange-50/50 py-2.5 px-3 rounded-2xl text-xs font-extrabold transition";
+
+      var BANK_SOAL = [
+        { level: "SD Dasar", tanya: "14 + 28 = ?", jawab: 42 },
+        { level: "SD Menengah", tanya: "3/4 dari 20 adalah ...", jawab: 15 },
+        { level: "SMP Awal", tanya: "Jika 2x + 6 = 20, maka nilai x adalah ...", jawab: 7 },
+        { level: "Latihan Kilat", tanya: "12 × 8 - 16 = ?", jawab: 80 }
+      ];
+
+      function setLoading(show, text) {
+        var el = document.getElementById("loader");
+        var txt = document.getElementById("loader-text");
+        if (txt && text) txt.textContent = text;
+        if (!el) return;
+        if (show) {
+          el.classList.remove("hidden");
+          el.classList.add("flex");
+        } else {
+          el.classList.add("hidden");
+          el.classList.remove("flex");
+        }
+      }
+
+      function showNotif(icon, title, message) {
+        document.getElementById("notif-icon").textContent = icon || "🧪";
+        document.getElementById("notif-title").textContent = title || "Informasi";
+        document.getElementById("notif-message").textContent = message || "";
+        var modal = document.getElementById("modal-notif");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeNotif() {
+        var modal = document.getElementById("modal-notif");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
+      function getSessionInfo() {
+        try {
+          var raw = localStorage.getItem(ADMIN_SESSION_KEY) || sessionStorage.getItem(ADMIN_SESSION_KEY);
+          if (!raw) return null;
+          var parsed = JSON.parse(raw);
+          if (!parsed || !parsed.id) return null;
+          return {
+            id: String(parsed.id).trim().toUpperCase(),
+            nama: String(parsed.nama || parsed.id).trim()
+          };
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function renderSessionBanner() {
+        var sess = getSessionInfo();
+        var infoEl = document.getElementById("lab-session-info");
+        if (sess) {
+          infoEl.textContent = "Sesi Admin Aktif: " + sess.id + " • " + sess.nama;
+        } else {
+          infoEl.textContent = "Belum ada sesi admin (simpan ke lab_catatan mungkin dibatasi aturan Firestore)";
+        }
+      }
+
+      function switchLabTab(tab) {
+        activeLabTab = tab || "catatan";
+        var list = ["catatan", "kuis", "sandi"];
+        for (var i = 0; i < list.length; i++) {
+          var t = list[i];
+          var panel = document.getElementById("lab-panel-" + t);
+          var btn = document.getElementById("lab-tab-" + t);
+          if (panel) {
+            if (t === activeLabTab) panel.classList.remove("hidden");
+            else panel.classList.add("hidden");
+          }
+          if (btn) {
+            btn.className = (t === activeLabTab) ? TAB_ACTIVE_CLS : TAB_IDLE_CLS;
+          }
+        }
+      }
+
+      function loadSiswaOptions() {
+        var sel = document.getElementById("lab-catatan-siswa");
+        db.collection("siswa").get()
+          .then(function(snap) {
+            sel.textContent = "";
+            var defOpt = document.createElement("option");
+            defOpt.value = "";
+            defOpt.textContent = "-- Pilih Siswa --";
+            sel.appendChild(defOpt);
+
+            var items = [];
+            snap.forEach(function(doc) {
+              var d = doc.data() || {};
+              items.push({
+                noReg: String(d.noReg || doc.id),
+                nama: String(d.nama || "-"),
+                kelas: String(d.kelas || "-")
+              });
+            });
+
+            items.sort(function(a, b) {
+              return a.noReg.localeCompare(b.noReg);
+            });
+
+            for (var i = 0; i < items.length; i++) {
+              var opt = document.createElement("option");
+              opt.value = items[i].noReg + "|" + items[i].nama;
+              opt.textContent = items[i].noReg + " - " + items[i].nama + " (" + items[i].kelas + ")";
+              sel.appendChild(opt);
+            }
+          })
+          .catch(function() {
+            sel.innerHTML = '<option value="">Gagal memuat daftar siswa</option>';
+          });
+      }
+
+      function loadLabCatatan() {
+        var container = document.getElementById("lab-list-catatan");
+        setLoading(true, "Memuat catatan uji coba...");
+        db.collection("lab_catatan").limit(15).get()
+          .then(function(snap) {
+            setLoading(false);
+            container.textContent = "";
+            if (snap.empty) {
+              container.innerHTML = '<p class="text-slate-400 text-center py-3">Belum ada catatan uji coba di lab_catatan.</p>';
+              return;
+            }
+
+            snap.forEach(function(doc) {
+              var d = doc.data() || {};
+              var card = document.createElement("div");
+              card.className = "p-3 rounded-2xl bg-orange-50/40 border border-orange-100 space-y-1";
+
+              var top = document.createElement("div");
+              top.className = "font-extrabold text-slate-800";
+              top.textContent = (d.namaSiswa || "-") + " (" + (d.noReg || "-") + ") • " + (d.topik || "Topik");
+
+              var pr = document.createElement("div");
+              pr.className = "text-slate-600 font-semibold";
+              pr.textContent = "PR/Catatan: " + (d.pr || "-");
+
+              card.appendChild(top);
+              card.appendChild(pr);
+              container.appendChild(card);
+            });
+          })
+          .catch(function() {
+            setLoading(false);
+            container.innerHTML = '<p class="text-slate-400 text-center py-3">Tidak dapat membaca lab_catatan.</p>';
+          });
+      }
+
+      function handleSimpanLabCatatan(event) {
+        event.preventDefault();
+        var rawSiswa = String(document.getElementById("lab-catatan-siswa").value || "");
+        var topik = String(document.getElementById("lab-catatan-topik").value || "").trim();
+        var pr = String(document.getElementById("lab-catatan-pr").value || "").trim();
+
+        if (!rawSiswa || !topik) return;
+        var parts = rawSiswa.split("|");
+        var noReg = parts[0] || "";
+        var namaSiswa = parts[1] || "";
+        var sess = getSessionInfo();
+
+        setLoading(true, "Menyimpan ke lab_catatan...");
+        db.collection("lab_catatan").add({
+          noReg: noReg,
+          namaSiswa: namaSiswa,
+          topik: topik,
+          pr: pr || "-",
+          dibuatOleh: sess ? sess.id : "GUEST_LAB",
+          dibuatPada: new Date().toISOString()
+        })
+          .then(function() {
+            setLoading(false);
+            document.getElementById("lab-catatan-topik").value = "";
+            document.getElementById("lab-catatan-pr").value = "";
+            showNotif("✅", "Tersimpan di Lab", "Catatan uji coba untuk " + namaSiswa + " berhasil disimpan.");
+            loadLabCatatan();
+          })
+          .catch(function(err) {
+            setLoading(false);
+            showNotif("⚠️", "Gagal Simpan", (err && err.message) ? err.message : "Periksa koneksi atau aturan Firestore.");
+          });
+      }
+
+      function pickRandomSoal() {
+        var idx = Math.floor(Math.random() * BANK_SOAL.length);
+        currentSoal = BANK_SOAL[idx];
+        document.getElementById("kuis-level").textContent = "Jenjang: " + currentSoal.level;
+        document.getElementById("kuis-pertanyaan").textContent = currentSoal.tanya;
+        document.getElementById("kuis-jawaban-input").value = "";
+        var fb = document.getElementById("kuis-feedback");
+        fb.classList.add("hidden");
+      }
+
+      function handleCekKuis(event) {
+        event.preventDefault();
+        if (!currentSoal) return;
+        var ans = Number(document.getElementById("kuis-jawaban-input").value);
+        var fb = document.getElementById("kuis-feedback");
+        fb.classList.remove("hidden");
+
+        if (ans === currentSoal.jawab) {
+          kuisSkor += 10;
+          document.getElementById("kuis-skor").textContent = "Skor Percobaan: " + kuisSkor;
+          fb.className = "text-xs font-extrabold text-emerald-700";
+          fb.textContent = "Benar! +10 poin. Coba klik 'Soal Baru' untuk latihan berikutnya.";
+        } else {
+          fb.className = "text-xs font-extrabold text-rose-600";
+          fb.textContent = "Belum tepat, jawabannya adalah " + currentSoal.jawab + ". Coba lagi ya!";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        renderSessionBanner();
+        pickRandomSoal();
+        loadSiswaOptions();
+        loadLabCatatan();
+
+        document.getElementById("btn-tutup-notif").addEventListener("click", closeNotif);
+
+        var tabBtns = document.querySelectorAll("[data-lab-tab]");
+        for (var i = 0; i < tabBtns.length; i++) {
+          tabBtns[i].addEventListener("click", function() {
+            switchLabTab(this.getAttribute("data-lab-tab"));
+          });
+        }
+
+        document.getElementById("form-lab-catatan").addEventListener("submit", handleSimpanLabCatatan);
+        document.getElementById("btn-refresh-catatan").addEventListener("click", loadLabCatatan);
+        document.getElementById("btn-acak-soal").addEventListener("click", pickRandomSoal);
+        document.getElementById("form-kuis-jawab").addEventListener("submit", handleCekKuis);
+
+        window.addEventListener("storage", function(e) {
+          if (e.key === ADMIN_SESSION_KEY) {
+            renderSessionBanner();
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
