@@ -22,7 +22,7 @@
   <!-- LOADER -->
   <div id="loader" class="fixed inset-0 bg-[#FFFDF9]/85 backdrop-blur-sm z-50 hidden flex-col items-center justify-center px-4">
     <div class="w-11 h-11 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
-    <p id="loader-text" class="mt-3 text-xs sm:text-sm font-bold text-orange-600">Memeriksa akses admin...</p>
+    <p id="loader-text" class="mt-3 text-xs sm:text-sm font-bold text-orange-600">Memproses...</p>
   </div>
 
   <!-- MODAL NOTIF -->
@@ -38,52 +38,47 @@
     </div>
   </div>
 
-  <!-- GERBANG LOGIN ADMIN (TAMPIL JIKA BELUM LOGIN / TIDAK BERHAK) -->
-  <div id="admin-gate" class="min-h-[80vh] flex items-center justify-center px-2">
-    <div class="w-full max-w-md bg-white border-[1.5px] border-orange-100 shadow-xl shadow-orange-500/10 rounded-3xl p-5 sm:p-7 space-y-5">
+  <!-- FORM LOGIN ADMIN (SAMA DENGAN FORM LOGIN ADMIN.HTML) -->
+  <div id="view-login-admin" class="min-h-[82vh] flex items-center justify-center px-1">
+    <div class="w-full max-w-md bg-white border-[1.5px] border-orange-100 shadow-xl shadow-orange-500/10 rounded-3xl p-6 sm:p-8 space-y-6">
       <div class="text-center space-y-2">
-        <div class="w-36 h-14 mx-auto flex items-center justify-center">
-          <img src="logo-megamath.png" alt="Mega Math" class="w-full h-full object-contain mix-blend-multiply">
+        <div class="w-40 h-16 mx-auto flex items-center justify-center">
+          <img src="logo-megamath.png" alt="Logo Mega Math" class="w-full h-full object-contain mix-blend-multiply">
         </div>
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-[11px] font-extrabold">
-          <span>🔒</span><span>Akses Khusus Admin</span>
-        </span>
-        <h1 class="text-lg sm:text-xl font-extrabold text-slate-800">Masuk ke Pengaturan Landing Page</h1>
-        <p class="text-xs text-slate-500 font-semibold">
-          Halaman ini dilindungi. Silakan login menggunakan akun admin aktif untuk mengubah promosi dan harga paket.
-        </p>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800">Login Panel Admin</h1>
+        <p class="text-xs font-bold text-slate-500">Masuk untuk mengelola Pengaturan Landing Page Mega Math</p>
       </div>
 
-      <form id="form-gate-login" class="space-y-3.5 text-xs">
+      <form id="form-login-admin" class="space-y-4 text-xs sm:text-sm">
         <div>
-          <label class="block font-extrabold text-slate-700 mb-1">ID Admin</label>
-          <input type="text" id="gate-admin-id" required placeholder="Contoh: ADMIN01"
-            class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 uppercase focus:outline-none focus:border-orange-400">
+          <label class="block text-xs font-extrabold text-slate-700 mb-1.5">ID Admin</label>
+          <input type="text" id="admin-id-input" required autocomplete="username" placeholder="ID ADMIN (MISAL: ADMIN01)"
+            class="w-full px-4 py-3 rounded-2xl bg-white border border-orange-200 font-extrabold text-slate-800 uppercase focus:outline-none focus:border-orange-400">
         </div>
 
         <div>
-          <label class="block font-extrabold text-slate-700 mb-1">Password Admin</label>
-          <input type="password" id="gate-admin-pass" required placeholder="Masukkan password admin"
-            class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
+          <label class="block text-xs font-extrabold text-slate-700 mb-1.5">Password Admin</label>
+          <input type="password" id="admin-pass-input" required autocomplete="current-password" placeholder="Masukkan password admin"
+            class="w-full px-4 py-3 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
         </div>
 
-        <p id="gate-error" class="text-xs font-bold text-rose-500 hidden"></p>
+        <p id="admin-login-error" class="text-xs font-bold text-rose-500 hidden"></p>
 
         <button type="submit"
-          class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold text-sm py-3 rounded-2xl shadow-lg shadow-orange-500/25 transition">
-          Verifikasi &amp; Masuk
+          class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold text-sm py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition">
+          Masuk ke Pengaturan Landing →
         </button>
       </form>
 
-      <div class="pt-2 border-t border-orange-100 flex items-center justify-between text-xs font-bold">
-        <a href="admin.html" class="text-orange-600 hover:underline">← Kembali ke Panel Admin</a>
+      <div class="pt-3 border-t border-orange-100 flex items-center justify-between text-xs font-extrabold">
+        <a href="admin.html" class="text-orange-600 hover:underline">← Ke Dashboard Admin</a>
         <a href="index.html" class="text-slate-500 hover:text-orange-600">Halaman Depan</a>
       </div>
     </div>
   </div>
 
-  <!-- KONTEN UTAMA PENGATURAN (HANYA MUNCUL SETELAH ADMIN TERVERIFIKASI) -->
-  <div id="admin-content" class="max-w-3xl mx-auto space-y-4 pb-12 hidden">
+  <!-- KONTEN PENGATURAN LANDING PAGE -->
+  <div id="view-pengaturan-landing" class="max-w-3xl mx-auto space-y-4 pb-12 hidden">
 
     <!-- HEADER -->
     <div class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
@@ -91,9 +86,7 @@
         <img src="favicon-megamath.png" alt="Mega Math" class="w-11 h-9 object-contain mix-blend-multiply shrink-0">
         <div class="min-w-0">
           <h1 class="text-base sm:text-xl font-extrabold text-slate-800 truncate">Pengaturan Landing Page</h1>
-          <p id="active-admin-badge" class="text-[11px] sm:text-xs font-bold text-emerald-700 truncate">
-            Admin terverifikasi
-          </p>
+          <p id="admin-session-info" class="text-[11px] sm:text-xs font-bold text-orange-600 truncate">-</p>
         </div>
       </div>
 
@@ -106,7 +99,7 @@
           class="text-xs font-extrabold px-3.5 py-2 rounded-xl border border-orange-200 text-slate-700 bg-white hover:bg-orange-50 transition">
           ← Panel Admin
         </a>
-        <button type="button" id="btn-keluar-akses"
+        <button type="button" id="btn-logout-admin"
           class="text-xs font-extrabold px-3 py-2 rounded-xl border border-rose-200 text-rose-600 bg-rose-50/70 hover:bg-rose-100 transition">
           Keluar
         </button>
@@ -185,13 +178,14 @@
       firebase.initializeApp(firebaseConfig);
       var db = firebase.firestore();
 
-      var SESSION_KEY = "bimbel_admin_session";
+      var ADMIN_SESSION_KEY = "bimbel_admin_session";
+      var currentAdmin = null;
       var hasLoadedSetting = false;
 
       var DEFAULT_LANDING = {
-        badgePromo: "Pendaftaran Kelas Baru Dibuka",
-        judulHero: "Bimbel Private yang Bikin Paham Konsep & Makin Percaya Diri",
-        subjudulHero: "Pendampingan belajar personal dan ramah anak untuk SD, SMP, dan SMA. Pantauan presensi dan tagihan transparan langsung melalui portal siswa.",
+        badgePromo: "Bimbel Private Ramah Anak • SD, SMP & SMA",
+        judulHero: "Matematika Jadi Lebih Mudah Dipahami & Nggak Bikin Anak Takut Salah",
+        subjudulHero: "Pendampingan belajar personal yang disesuaikan dengan ritme anak. Orang tua juga bisa memantau rekap pertemuan dan status pembayaran secara transparan lewat portal siswa.",
         ctaWaTeks: "Halo Admin Mega Math, saya ingin tanya info paket & pendaftaran bimbel.",
         paketList: [
           {
@@ -200,7 +194,7 @@
             targetKelas: "SD / SMP / SMA",
             hargaPerSesi: 100000,
             jumlahSesi: 4,
-            deskripsi: "Cocok untuk coba kelas, pendampingan PR harian, dan pemantapan topik tertentu.",
+            deskripsi: "Cocok untuk kenalan dengan metode belajar Mega Math, bantu selesaikan PR sekolah, atau memantapkan 1–2 topik yang sedang bikin bingung.",
             badge: "Pilihan Awal",
             unggulan: false
           },
@@ -210,7 +204,7 @@
             targetKelas: "SD / SMP / SMA",
             hargaPerSesi: 100000,
             jumlahSesi: 8,
-            deskripsi: "Belajar rutin 2x seminggu dengan evaluasi berkala dan latihan soal terarah.",
+            deskripsi: "Pilihan paling pas untuk belajar rutin mingguan agar konsep makin nempel, latihan soal lebih terarah, dan nilai harian lebih terjaga.",
             badge: "Paling Diminati",
             unggulan: true
           }
@@ -248,23 +242,9 @@
         modal.classList.remove("flex");
       }
 
-      function showAdminGate(errorMsg) {
-        document.getElementById("admin-content").classList.add("hidden");
-        document.getElementById("admin-gate").classList.remove("hidden");
-        document.getElementById("admin-gate").classList.add("flex");
-        var errEl = document.getElementById("gate-error");
-        if (errorMsg) {
-          errEl.textContent = errorMsg;
-          errEl.classList.remove("hidden");
-        } else {
-          errEl.textContent = "";
-          errEl.classList.add("hidden");
-        }
-      }
-
       function readAdminSession() {
         try {
-          var raw = localStorage.getItem(SESSION_KEY);
+          var raw = localStorage.getItem(ADMIN_SESSION_KEY) || sessionStorage.getItem(ADMIN_SESSION_KEY);
           if (!raw) return null;
           var parsed = JSON.parse(raw);
           if (!parsed || !parsed.id) return null;
@@ -277,30 +257,50 @@
         }
       }
 
-      function writeAdminSession(adminObj) {
+      function saveAdminSession(adminObj) {
+        var clean = {
+          id: String(adminObj.id || "").trim().toUpperCase(),
+          nama: String(adminObj.nama || adminObj.id || "").trim()
+        };
         try {
-          localStorage.setItem(SESSION_KEY, JSON.stringify({
-            id: String(adminObj.id || "").trim().toUpperCase(),
-            nama: String(adminObj.nama || adminObj.id || "").trim(),
-            loginAt: Date.now()
-          }));
+          localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(clean));
+          sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(clean));
         } catch (e) {}
+        return clean;
       }
 
       function clearAdminSession() {
+        currentAdmin = null;
         try {
-          localStorage.removeItem(SESSION_KEY);
-          sessionStorage.removeItem(SESSION_KEY);
+          localStorage.removeItem(ADMIN_SESSION_KEY);
+          sessionStorage.removeItem(ADMIN_SESSION_KEY);
         } catch (e) {}
       }
 
-      function unlockAdminView(adminInfo) {
-        document.getElementById("admin-gate").classList.add("hidden");
-        document.getElementById("admin-gate").classList.remove("flex");
-        document.getElementById("admin-content").classList.remove("hidden");
+      function showLoginAdminView(errMessage) {
+        currentAdmin = null;
+        hasLoadedSetting = false;
+        document.getElementById("view-pengaturan-landing").classList.add("hidden");
+        document.getElementById("view-login-admin").classList.remove("hidden");
+        document.getElementById("view-login-admin").classList.add("flex");
 
-        document.getElementById("active-admin-badge").textContent =
-          adminInfo.id + " • " + (adminInfo.nama || adminInfo.id);
+        var errEl = document.getElementById("admin-login-error");
+        if (errMessage) {
+          errEl.textContent = errMessage;
+          errEl.classList.remove("hidden");
+        } else {
+          errEl.textContent = "";
+          errEl.classList.add("hidden");
+        }
+      }
+
+      function enterLandingSettingView(adminObj) {
+        currentAdmin = saveAdminSession(adminObj);
+        document.getElementById("admin-session-info").textContent = currentAdmin.id + " • " + currentAdmin.nama;
+
+        document.getElementById("view-login-admin").classList.add("hidden");
+        document.getElementById("view-login-admin").classList.remove("flex");
+        document.getElementById("view-pengaturan-landing").classList.remove("hidden");
 
         if (!hasLoadedSetting) {
           hasLoadedSetting = true;
@@ -308,57 +308,46 @@
         }
       }
 
-      function verifyStoredSession() {
-        var session = readAdminSession();
-        if (!session) {
-          hasLoadedSetting = false;
-          showAdminGate("Belum ada sesi login admin. Silakan login terlebih dahulu.");
+      function syncFromAdminSession() {
+        var sess = readAdminSession();
+        if (!sess) {
+          showLoginAdminView("");
           return;
         }
 
-        unlockAdminView(session);
+        // Ikuti sesi dari admin.html secara langsung
+        enterLandingSettingView(sess);
 
-        db.collection("admin").doc(session.id).get()
+        // Validasi status akun di Firestore di belakang layar
+        db.collection("admin").doc(sess.id).get()
           .then(function(doc) {
             if (!doc.exists) {
               clearAdminSession();
-              hasLoadedSetting = false;
-              showAdminGate("Akun admin '" + session.id + "' tidak ditemukan.");
+              showLoginAdminView("ID Admin tidak ditemukan.");
               return;
             }
             var a = doc.data() || {};
             if (a.aktif === false) {
               clearAdminSession();
-              hasLoadedSetting = false;
-              showAdminGate("Akun admin '" + session.id + "' sedang nonaktif.");
+              showLoginAdminView("Akun admin sedang nonaktif.");
               return;
             }
-            var freshInfo = {
-              id: String(a.id || doc.id).trim().toUpperCase(),
-              nama: String(a.nama || session.nama || doc.id).trim()
-            };
-            writeAdminSession(freshInfo);
-            unlockAdminView(freshInfo);
+            enterLandingSettingView({
+              id: String(a.id || doc.id),
+              nama: String(a.nama || sess.nama || doc.id)
+            });
           })
-          .catch(function() {
-            // Tetap pertahankan sesi jika gagal koneksi sementara
-          });
+          .catch(function() {});
       }
 
-      function handleGateLogin(event) {
+      function handleLoginAdmin(event) {
         event.preventDefault();
-        var adminId = String(document.getElementById("gate-admin-id").value || "").trim().toUpperCase();
-        var pass = String(document.getElementById("gate-admin-pass").value || "");
-        var errEl = document.getElementById("gate-error");
+        var adminId = String(document.getElementById("admin-id-input").value || "").trim().toUpperCase();
+        var pass = String(document.getElementById("admin-pass-input").value || "");
+        var errEl = document.getElementById("admin-login-error");
         errEl.classList.add("hidden");
 
-        if (!adminId || !pass) {
-          errEl.textContent = "ID Admin dan password wajib diisi.";
-          errEl.classList.remove("hidden");
-          return;
-        }
-
-        setLoading(true, "Mengecek kredensial admin...");
+        setLoading(true, "Memverifikasi akun admin...");
         db.collection("admin").doc(adminId).get()
           .then(function(doc) {
             setLoading(false);
@@ -378,14 +367,11 @@
               errEl.classList.remove("hidden");
               return;
             }
-
-            var info = {
-              id: String(a.id || doc.id).trim().toUpperCase(),
-              nama: String(a.nama || doc.id).trim()
-            };
-            writeAdminSession(info);
-            document.getElementById("gate-admin-pass").value = "";
-            unlockAdminView(info);
+            document.getElementById("admin-pass-input").value = "";
+            enterLandingSettingView({
+              id: String(a.id || doc.id),
+              nama: String(a.nama || doc.id)
+            });
           })
           .catch(function() {
             setLoading(false);
@@ -516,7 +502,7 @@
       function handleSaveLanding(event) {
         event.preventDefault();
         if (!readAdminSession()) {
-          showAdminGate("Sesi admin berakhir. Silakan login ulang sebelum menyimpan.");
+          showLoginAdminView("Sesi admin berakhir. Silakan masuk kembali.");
           return;
         }
 
@@ -557,11 +543,10 @@
 
       document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("btn-tutup-notif").addEventListener("click", closeNotif);
-        document.getElementById("form-gate-login").addEventListener("submit", handleGateLogin);
-        document.getElementById("btn-keluar-akses").addEventListener("click", function() {
+        document.getElementById("form-login-admin").addEventListener("submit", handleLoginAdmin);
+        document.getElementById("btn-logout-admin").addEventListener("click", function() {
           clearAdminSession();
-          hasLoadedSetting = false;
-          window.location.href = "index.html";
+          window.location.href = "admin.html";
         });
         document.getElementById("btn-tambah-paket").addEventListener("click", function() {
           syncItemsFromDom();
@@ -579,17 +564,23 @@
         });
         document.getElementById("form-landing-setting").addEventListener("submit", handleSaveLanding);
 
-        verifyStoredSession();
+        syncFromAdminSession();
       });
 
       window.addEventListener("storage", function(e) {
-        if (e.key === SESSION_KEY) {
-          verifyStoredSession();
+        if (e.key === ADMIN_SESSION_KEY) {
+          syncFromAdminSession();
         }
       });
 
       window.addEventListener("pageshow", function() {
-        verifyStoredSession();
+        syncFromAdminSession();
+      });
+
+      document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) {
+          syncFromAdminSession();
+        }
       });
     })();
   </script>
