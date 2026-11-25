@@ -175,10 +175,11 @@
         measurementId: "G-X3JBT00B7L"
       };
 
+      var ADMIN_SESSION_KEY = "bimbel_admin_session";
+
       firebase.initializeApp(firebaseConfig);
       var db = firebase.firestore();
 
-      var ADMIN_SESSION_KEY = "bimbel_admin_session";
       var currentAdmin = null;
       var hasLoadedSetting = false;
 
@@ -259,8 +260,8 @@
 
       function saveAdminSession(adminObj) {
         var clean = {
-          id: String(adminObj.id || "").trim().toUpperCase(),
-          nama: String(adminObj.nama || adminObj.id || "").trim()
+          id: String(adminObj && adminObj.id ? adminObj.id : "").trim().toUpperCase(),
+          nama: String(adminObj && adminObj.nama ? adminObj.nama : "").trim()
         };
         try {
           localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(clean));
@@ -315,10 +316,8 @@
           return;
         }
 
-        // Ikuti sesi dari admin.html secara langsung
         enterLandingSettingView(sess);
 
-        // Validasi status akun di Firestore di belakang layar
         db.collection("admin").doc(sess.id).get()
           .then(function(doc) {
             if (!doc.exists) {
