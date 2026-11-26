@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="favicon-megamath.png">
   <title>Panel Admin Bimbel - Mega Math</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Nunito', sans-serif;
@@ -22,7 +22,7 @@
   <!-- LOADING -->
   <div id="loader" class="fixed inset-0 bg-[#FFFDF9]/85 backdrop-blur-sm z-50 hidden flex-col items-center justify-center px-4">
     <div class="w-11 h-11 sm:w-12 sm:h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
-    <p class="mt-3 text-xs sm:text-sm font-bold text-orange-600">Memproses data...</p>
+    <p id="loader-text" class="mt-3 text-xs sm:text-sm font-bold text-orange-600">Memproses data...</p>
   </div>
 
   <!-- MODAL NOTIFIKASI -->
@@ -153,33 +153,11 @@
     </div>
   </div>
 
-  <!-- LOGIN ADMIN -->
-  <div id="view-login-admin" class="w-full max-w-md bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-5 sm:p-7 my-auto">
-    <div class="text-center mb-6">
-      <div class="w-48 sm:w-52 h-20 sm:h-24 mx-auto mb-3 flex items-center justify-center">
-        <img src="logo-megamath.png" alt="Logo Mega Math" class="w-full h-full object-contain mix-blend-multiply">
-      </div>
-      <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800">Panel Admin Bimbel</h1>
-      <p class="text-xs sm:text-sm text-slate-500 mt-1">Mega Math - Bimbel Private</p>
-    </div>
-
-    <form id="form-login-admin" class="space-y-4">
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">ID Admin</label>
-        <input type="text" id="admin-id-input" required autocomplete="username" placeholder="Contoh: ADMIN01"
-          class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 focus:outline-none focus:border-orange-400 focus:bg-white text-sm font-bold text-slate-800 uppercase">
-      </div>
-      <div>
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password Admin</label>
-        <input type="password" id="admin-pass-input" required autocomplete="current-password" placeholder="Masukkan password"
-          class="w-full px-4 py-3 rounded-2xl bg-orange-50/50 border border-orange-200 focus:outline-none focus:border-orange-400 focus:bg-white text-sm font-bold text-slate-800">
-      </div>
-      <p id="admin-login-error" class="text-xs font-bold text-rose-500 hidden text-center"></p>
-      <button type="submit"
-        class="w-full bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold text-sm sm:text-base py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition">
-        Masuk Panel Admin 🚀
-      </button>
-    </form>
+  <!-- VIEW VERIFIKASI SESI SSO -->
+  <div id="view-verifying-sso" class="w-full max-w-md bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-6 my-auto text-center space-y-3">
+    <div class="w-12 h-12 mx-auto rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-2xl animate-pulse">🔐</div>
+    <h1 class="text-base font-extrabold text-slate-800">Memverifikasi Sesi Admin Utama...</h1>
+    <p class="text-xs font-semibold text-slate-500">Mengecek autentikasi dan hak akses di portal Mega Math.</p>
   </div>
 
   <!-- DASHBOARD ADMIN -->
@@ -187,7 +165,7 @@
 
     <!-- HEADER & NAVIGASI 4 TAB -->
     <div class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-5 space-y-4">
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <img src="favicon-megamath.png" alt="Mega Math" class="w-12 sm:w-14 h-9 sm:h-10 object-contain mix-blend-multiply shrink-0">
           <div class="min-w-0">
@@ -198,10 +176,25 @@
             </p>
           </div>
         </div>
-        <button type="button" id="btn-logout-admin"
-          class="text-xs font-extrabold px-3.5 py-2 rounded-xl border border-orange-200 text-orange-600 bg-white hover:bg-orange-50 shrink-0 transition">
-          Keluar
-        </button>
+
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap shrink-0">
+          <a href="admin-sdm.html"
+            class="text-xs font-extrabold px-3 py-2 rounded-xl border border-orange-200 text-orange-700 bg-orange-50/70 hover:bg-orange-100 transition">
+            🛡️ SDM
+          </a>
+          <a href="staff.html"
+            class="text-xs font-extrabold px-3 py-2 rounded-xl border border-orange-200 text-orange-700 bg-orange-50/70 hover:bg-orange-100 transition">
+            📋 Staff
+          </a>
+          <a href="guru.html"
+            class="text-xs font-extrabold px-3 py-2 rounded-xl border border-orange-200 text-orange-700 bg-orange-50/70 hover:bg-orange-100 transition">
+            🎓 Guru
+          </a>
+          <button type="button" id="btn-logout-admin"
+            class="text-xs font-extrabold px-3.5 py-2 rounded-xl border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 transition">
+            Keluar
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -219,7 +212,7 @@
         </button>
         <button type="button" data-tab="wa-admin" id="tab-btn-wa-admin"
           class="bg-white text-slate-600 border-[1.5px] border-orange-300/80 hover:bg-orange-50/50 py-2.5 px-2.5 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition">
-          <span>⚙️</span><span>WA &amp; Admin</span>
+          <span>⚙️</span><span>WA &amp; Pengaturan</span>
         </button>
       </div>
     </div>
@@ -339,12 +332,12 @@
       </div>
     </section>
 
-    <!-- HALAMAN 4: WA & ADMIN -->
+    <!-- HALAMAN 4: WA & PENGATURAN -->
     <section id="page-wa-admin" class="bg-white border-[1.5px] border-orange-100 shadow-lg shadow-orange-500/5 rounded-3xl p-4 sm:p-6 space-y-5 sm:space-y-6 hidden">
       <div class="flex items-center justify-between gap-2 border-b border-orange-100 pb-3">
         <h3 class="text-xs sm:text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
           <span>⚙️</span>
-          <span>Pengaturan WA &amp; Akun Admin</span>
+          <span>Pengaturan WA &amp; Landing Page</span>
         </h3>
         <button type="button" data-back-home
           class="text-xs font-extrabold px-3 py-1.5 rounded-xl border border-orange-200 text-slate-600 bg-white hover:bg-orange-50 shrink-0 transition">
@@ -370,38 +363,21 @@
         </div>
       </form>
 
-      <!-- TAMBAH / PERBARUI AKUN ADMIN -->
-      <div class="border-t border-orange-100 pt-5 space-y-3 text-xs">
-        <h4 class="text-xs font-extrabold uppercase tracking-wide text-orange-600">
-          👥 TAMBAH / PERBARUI AKUN ADMIN
-        </h4>
-
-        <form id="form-simpan-admin" class="space-y-3">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            <input type="text" id="adm-id-field" required placeholder="ID ADMIN (MISAL: ADMIN02)"
-              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 uppercase focus:outline-none focus:border-orange-400">
-            <input type="text" id="adm-nama-field" required placeholder="Nama Admin (misal: Kak Rina)"
-              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
-            <input type="password" id="adm-pass-field" minlength="4" placeholder="Password (min. 4)"
-              class="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-bold text-slate-800 focus:outline-none focus:border-orange-400">
+      <!-- KELOLA TIM / SDM -->
+      <div class="border-t border-orange-100 pt-5 text-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-orange-50/60 border border-orange-200/80">
+          <div class="space-y-0.5">
+            <h4 class="text-xs font-extrabold uppercase tracking-wide text-orange-600">
+              🛡️ MANAJEMEN AKUN ADMIN, STAFF &amp; GURU (ID 9 DIGIT)
+            </h4>
+            <p class="text-slate-600 font-semibold">
+              Buat, aktifkan, atau nonaktifkan akun tim di panel Admin SDM.
+            </p>
           </div>
-
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <select id="adm-status-field"
-              class="w-full sm:w-auto px-3.5 py-2.5 rounded-2xl bg-white border border-orange-200 font-extrabold text-slate-800 focus:outline-none focus:border-orange-400">
-              <option value="true">AKTIF</option>
-              <option value="false">NONAKTIF</option>
-            </select>
-
-            <button type="submit"
-              class="w-full sm:w-auto bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 active:scale-[0.98] text-white font-extrabold px-5 py-2.5 rounded-2xl shadow-md shadow-orange-500/25 transition">
-              Simpan Akun Admin
-            </button>
-          </div>
-        </form>
-
-        <div id="daftar-akun-admin" class="space-y-2.5 pt-2">
-          <p class="text-slate-400 text-center py-2">Memuat daftar admin...</p>
+          <a href="admin-sdm.html"
+            class="w-full sm:w-auto text-center bg-white hover:bg-orange-50 border border-orange-300 text-orange-700 font-extrabold px-4 py-2.5 rounded-2xl shrink-0 transition">
+            Buka Admin SDM →
+          </a>
         </div>
       </div>
 
@@ -426,8 +402,9 @@
 
   </div>
 
-  <!-- FIREBASE COMPAT SDK -->
+  <!-- FIREBASE COMPAT SDK (FIRESTORE + AUTH UNTUK ROUTE GUARD SSO) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script>
@@ -443,9 +420,9 @@
       };
 
       var DRIVE_UPLOAD_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwG5S2T5xWtmzIClhSrpWvky6W8o7CCxQZqdglXNH5KDUr_oDfvqKW-FcHiMeWBmSGHGA/exec";
-      var ADMIN_SESSION_KEY = "bimbel_admin_session";
 
       firebase.initializeApp(firebaseConfig);
+      var auth = firebase.auth();
       var db = firebase.firestore();
 
       var MIN_BIAYA = 1000;
@@ -549,8 +526,10 @@
         return { ok: true, value: num };
       }
 
-      function setLoading(show) {
+      function setLoading(show, text) {
         var el = document.getElementById("loader");
+        var txt = document.getElementById("loader-text");
+        if (txt && text) txt.textContent = text;
         if (!el) return;
         if (show) {
           el.classList.remove("hidden");
@@ -601,7 +580,7 @@
         } else if (activeTab === "riwayat") {
           loadRiwayatPresensi();
         } else if (activeTab === "wa-admin") {
-          loadPengaturanDanAdmin();
+          loadPengaturan();
         }
       }
 
@@ -635,7 +614,7 @@
           return;
         }
 
-        setLoading(true);
+        setLoading(true, "Menyimpan nomor WA admin...");
         db.collection("pengaturan").doc("global").set({
           namaBimbel: globalPengaturan.namaBimbel,
           adminWa: wa62,
@@ -650,110 +629,6 @@
           .catch(function() {
             setLoading(false);
             showNotif("⚠️", "Gagal Menyimpan", "Tidak dapat menyimpan nomor WA admin.");
-          });
-      }
-
-      function loadPengaturanDanAdmin() {
-        setLoading(true);
-        Promise.all([
-          loadPengaturan(),
-          db.collection("admin").get()
-        ])
-          .then(function(res) {
-            setLoading(false);
-            var snap = res[1];
-            var container = document.getElementById("daftar-akun-admin");
-            container.textContent = "";
-
-            if (snap.empty) {
-              container.innerHTML = '<p class="text-slate-400 text-center py-2">Belum ada akun admin di koleksi Firestore.</p>';
-              return;
-            }
-
-            snap.forEach(function(doc) {
-              var a = doc.data();
-              var admId = String(a.id || doc.id);
-              var admNama = String(a.nama || admId);
-              var isAktif = a.aktif !== false;
-
-              var row = document.createElement("div");
-              row.className = "p-3.5 rounded-2xl bg-white border border-orange-200 flex items-center justify-between gap-2";
-
-              var info = document.createElement("div");
-              info.className = "min-w-0 truncate";
-              info.innerHTML = '<span class="font-extrabold text-slate-800">' + admNama + '</span> <span class="text-slate-500 font-bold">(' + admId + ')</span>';
-
-              var right = document.createElement("div");
-              right.className = "flex items-center gap-2 shrink-0";
-
-              var badge = document.createElement("span");
-              badge.className = isAktif
-                ? "text-[11px] font-extrabold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700"
-                : "text-[11px] font-extrabold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500";
-              badge.textContent = isAktif ? "AKTIF" : "NONAKTIF";
-
-              var btnPilih = document.createElement("button");
-              btnPilih.type = "button";
-              btnPilih.className = "text-xs font-extrabold text-orange-600 hover:underline px-1";
-              btnPilih.textContent = "Pilih";
-              btnPilih.addEventListener("click", function() {
-                document.getElementById("adm-id-field").value = admId;
-                document.getElementById("adm-nama-field").value = admNama;
-                document.getElementById("adm-status-field").value = isAktif ? "true" : "false";
-                document.getElementById("adm-pass-field").value = "";
-              });
-
-              right.appendChild(badge);
-              right.appendChild(btnPilih);
-              row.appendChild(info);
-              row.appendChild(right);
-              container.appendChild(row);
-            });
-          })
-          .catch(function() {
-            setLoading(false);
-          });
-      }
-
-      function handleSimpanAkunAdmin(event) {
-        event.preventDefault();
-        var admId = String(document.getElementById("adm-id-field").value || "").trim().toUpperCase();
-        var admNama = String(document.getElementById("adm-nama-field").value || "").trim();
-        var admPass = String(document.getElementById("adm-pass-field").value || "");
-        var isAktif = document.getElementById("adm-status-field").value === "true";
-
-        if (!admId || !admNama) return;
-
-        setLoading(true);
-        var adminRef = db.collection("admin").doc(admId);
-
-        adminRef.get().then(function(existing) {
-          var payload = {
-            id: admId,
-            nama: admNama,
-            aktif: isAktif
-          };
-          if (admPass) {
-            payload.password = admPass;
-          } else if (existing.exists && existing.data().password) {
-            payload.password = existing.data().password;
-          } else {
-            payload.password = "1234";
-          }
-
-          return adminRef.set(payload, { merge: true });
-        })
-          .then(function() {
-            setLoading(false);
-            document.getElementById("adm-id-field").value = "";
-            document.getElementById("adm-nama-field").value = "";
-            document.getElementById("adm-pass-field").value = "";
-            showNotif("👥", "Akun Admin Tersimpan", "Data admin " + admNama + " (" + admId + ") berhasil disimpan.");
-            loadPengaturanDanAdmin();
-          })
-          .catch(function() {
-            setLoading(false);
-            showNotif("⚠️", "Gagal", "Tidak dapat menyimpan akun admin.");
           });
       }
 
@@ -804,7 +679,7 @@
         }
 
         var biayaPerSesi = biayaCheck.value;
-        setLoading(true);
+        setLoading(true, "Mengaktifkan akun siswa...");
 
         generateUniqueNoReg()
           .then(function(noReg) {
@@ -954,7 +829,7 @@
         var docId = pendingLunasTarget.noReg + "_" + pendingLunasTarget.bulan;
         var sesiLunasBaru = pendingLunasTarget.sesiTotal;
 
-        setLoading(true);
+        setLoading(true, "Menyimpan status LUNAS...");
         if (fileObj && statusEl) {
           statusEl.textContent = "Mengupload bukti pembayaran ke Google Drive...";
           statusEl.classList.remove("hidden");
@@ -978,7 +853,7 @@
               tglBayar: tglBayar,
               linkBukti: finalLinkBukti,
               verifiedBy: currentAdmin.nama,
-              verifiedAdminId: currentAdmin.id
+              verifiedAdminId: currentAdmin.id_user || currentAdmin.uid
             }, { merge: true });
           })
           .then(function() {
@@ -1027,7 +902,7 @@
         var target = pendingHapusTarget;
         var nextAktif = !target.statusAktif;
 
-        setLoading(true);
+        setLoading(true, "Memperbarui akses siswa...");
         db.collection("siswa").doc(target.noReg).update({
           statusAktif: nextAktif
         })
@@ -1073,7 +948,7 @@
           return;
         }
 
-        setLoading(true);
+        setLoading(true, "Menghapus data siswa & riwayat...");
         Promise.all([
           deleteDocsByQuery(db.collection("presensi").where("noReg", "==", target.noReg)),
           deleteDocsByQuery(db.collection("pembayaran").where("noReg", "==", target.noReg)),
@@ -1094,7 +969,7 @@
 
       function batalkanLunas(item) {
         var docId = item.noReg + "_" + item.bulan;
-        setLoading(true);
+        setLoading(true, "Membatalkan status LUNAS...");
         db.collection("pembayaran").doc(docId).set({
           noReg: item.noReg,
           bulan: item.bulan,
@@ -1115,7 +990,7 @@
       }
 
       function resetPasswordSiswa(item) {
-        setLoading(true);
+        setLoading(true, "Mereset password siswa...");
         db.collection("siswa").doc(item.noReg).update({
           password: item.noReg,
           mustChangePassword: true
@@ -1133,7 +1008,7 @@
         var bulan = getCurrentMonthStr();
         document.getElementById("label-bulan-tagihan").textContent = bulan;
 
-        setLoading(true);
+        setLoading(true, "Memuat data tagihan siswa...");
         Promise.all([
           loadPengaturan(),
           db.collection("siswa").get(),
@@ -1352,7 +1227,7 @@
 
       function loadRiwayatPresensi() {
         var bulan = populateMonthSelect();
-        setLoading(true);
+        setLoading(true, "Memuat riwayat presensi...");
 
         Promise.all([
           db.collection("siswa").get(),
@@ -1383,6 +1258,7 @@
                 nama: String(h.nama || "-"),
                 tanggal: String(h.tanggal || "-"),
                 jam: String(h.jam || "-"),
+                guruNama: String(h.guru_nama || ""),
                 namaOrtu: infoOrtu.namaOrtu,
                 waOrtu: infoOrtu.waOrtu
               });
@@ -1414,8 +1290,9 @@
 
                 var sub = document.createElement("div");
                 sub.className = "text-slate-500 font-semibold flex flex-wrap items-center gap-2";
+                var guruText = r.guruNama ? (" • Guru: " + r.guruNama) : "";
                 var ortuText = r.namaOrtu ? (" • Ortu: " + r.namaOrtu) : "";
-                sub.textContent = "📅 " + r.tanggal + " • ⏰ " + r.jam + " WIB" + ortuText;
+                sub.textContent = "📅 " + r.tanggal + " • ⏰ " + r.jam + " WIB" + guruText + ortuText;
 
                 left.appendChild(title);
                 left.appendChild(sub);
@@ -1444,111 +1321,53 @@
           });
       }
 
-      function getSavedAdminSession() {
-        try {
-          var raw = localStorage.getItem(ADMIN_SESSION_KEY) || sessionStorage.getItem(ADMIN_SESSION_KEY);
-          if (!raw) return null;
-          var obj = JSON.parse(raw);
-          if (!obj || !obj.id) return null;
-          return {
-            id: String(obj.id).trim().toUpperCase(),
-            nama: String(obj.nama || obj.id).trim()
-          };
-        } catch (e) {
-          return null;
-        }
-      }
-
       function enterAdminDashboard(adminObj) {
-        currentAdmin = {
-          id: String(adminObj && adminObj.id ? adminObj.id : "").trim().toUpperCase(),
-          nama: String(adminObj && adminObj.nama ? adminObj.nama : "").trim()
-        };
+        currentAdmin = adminObj;
 
-        try {
-          localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdmin));
-          sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdmin));
-        } catch (e) {}
-
-        document.getElementById("admin-session-info").textContent = currentAdmin.id + " • " + currentAdmin.nama;
+        document.getElementById("admin-session-info").textContent =
+          (adminObj.id_user ? adminObj.id_user + " • " : "") + adminObj.nama;
         document.getElementById("header-periode").textContent = getCurrentMonthStr();
         populateMonthSelect();
 
-        document.getElementById("view-login-admin").classList.add("hidden");
+        document.getElementById("view-verifying-sso").classList.add("hidden");
         document.getElementById("view-dashboard-admin").classList.remove("hidden");
 
         loadPengaturan();
         switchTab(activeTab || "aktivasi");
       }
 
-      function handleLoginAdmin(event) {
-        event.preventDefault();
-        var adminId = String(document.getElementById("admin-id-input").value || "").trim().toUpperCase();
-        var pass = String(document.getElementById("admin-pass-input").value || "");
-        var errEl = document.getElementById("admin-login-error");
-        errEl.classList.add("hidden");
+      function handleLogoutAdmin() {
+        currentAdmin = null;
+        auth.signOut().finally(function() {
+          window.location.replace("login.html");
+        });
+      }
 
-        setLoading(true);
-        db.collection("admin").doc(adminId).get()
-          .then(function(doc) {
-            setLoading(false);
-            if (!doc.exists) {
-              errEl.textContent = "ID Admin tidak ditemukan.";
-              errEl.classList.remove("hidden");
+      // Route Guard SSO: Wajib login via login.html dengan role 'admin' aktif di users/{uid}
+      auth.onAuthStateChanged(function(user) {
+        if (!user) {
+          window.location.replace("login.html");
+          return;
+        }
+
+        db.collection("users").doc(user.uid).get()
+          .then(function(userSnap) {
+            if (!userSnap.exists || !userSnap.data().status_aktif || userSnap.data().role !== "admin") {
+              window.location.replace("login.html?err=unauthorized");
               return;
             }
-            var a = doc.data();
-            if (a.aktif === false) {
-              errEl.textContent = "Akun admin sedang nonaktif.";
-              errEl.classList.remove("hidden");
-              return;
-            }
-            if (String(a.password || "") !== pass) {
-              errEl.textContent = "Password admin salah.";
-              errEl.classList.remove("hidden");
-              return;
-            }
-            document.getElementById("admin-pass-input").value = "";
+            var uData = userSnap.data();
             enterAdminDashboard({
-              id: String(a.id || doc.id),
-              nama: String(a.nama || doc.id)
+              uid: user.uid,
+              id_user: uData.id_user || "",
+              nama: uData.nama || "Admin Utama",
+              role: uData.role
             });
           })
           .catch(function() {
-            setLoading(false);
-            errEl.textContent = "Gagal menghubungi Firestore.";
-            errEl.classList.remove("hidden");
+            window.location.replace("login.html");
           });
-      }
-
-      function handleLogoutAdmin() {
-        currentAdmin = null;
-        try {
-          localStorage.removeItem(ADMIN_SESSION_KEY);
-          sessionStorage.removeItem(ADMIN_SESSION_KEY);
-        } catch (e) {}
-        document.getElementById("view-dashboard-admin").classList.add("hidden");
-        document.getElementById("view-login-admin").classList.remove("hidden");
-        document.getElementById("admin-pass-input").value = "";
-      }
-
-      function syncAdminSessionState() {
-        var saved = getSavedAdminSession();
-        var dashEl = document.getElementById("view-dashboard-admin");
-        var loginEl = document.getElementById("view-login-admin");
-
-        if (saved) {
-          if (!currentAdmin || currentAdmin.id !== saved.id || (dashEl && dashEl.classList.contains("hidden"))) {
-            enterAdminDashboard(saved);
-          }
-        } else {
-          if (currentAdmin || (dashEl && !dashEl.classList.contains("hidden"))) {
-            handleLogoutAdmin();
-          } else if (loginEl) {
-            loginEl.classList.remove("hidden");
-          }
-        }
-      }
+      });
 
       document.addEventListener("DOMContentLoaded", function() {
         attachNoZeroWaInput(document.getElementById("reg-wa-ortu"));
@@ -1566,7 +1385,6 @@
         }
 
         document.getElementById("btn-tutup-notif").addEventListener("click", closeNotif);
-        document.getElementById("form-login-admin").addEventListener("submit", handleLoginAdmin);
         document.getElementById("btn-logout-admin").addEventListener("click", handleLogoutAdmin);
 
         var tabBtns = document.querySelectorAll("[data-tab]");
@@ -1588,30 +1406,11 @@
         document.getElementById("btn-refresh-riwayat").addEventListener("click", loadRiwayatPresensi);
         document.getElementById("admin-filter-bulan").addEventListener("change", loadRiwayatPresensi);
         document.getElementById("form-wa-admin").addEventListener("submit", handleSaveWaAdmin);
-        document.getElementById("form-simpan-admin").addEventListener("submit", handleSimpanAkunAdmin);
         document.getElementById("btn-tutup-lunas").addEventListener("click", closeLunasModal);
         document.getElementById("form-konfirmasi-lunas").addEventListener("submit", handleKonfirmasiLunas);
         document.getElementById("btn-tutup-hapus").addEventListener("click", closeHapusModal);
         document.getElementById("btn-toggle-akses-siswa").addEventListener("click", handleToggleAksesSiswa);
         document.getElementById("form-hapus-permanen").addEventListener("submit", handleHapusPermanenSiswa);
-
-        syncAdminSessionState();
-
-        window.addEventListener("storage", function(e) {
-          if (e.key === ADMIN_SESSION_KEY) {
-            syncAdminSessionState();
-          }
-        });
-
-        window.addEventListener("pageshow", function() {
-          syncAdminSessionState();
-        });
-
-        document.addEventListener("visibilitychange", function() {
-          if (!document.hidden) {
-            syncAdminSessionState();
-          }
-        });
       });
     })();
   </script>
